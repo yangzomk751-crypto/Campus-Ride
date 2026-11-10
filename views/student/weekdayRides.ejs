@@ -1,0 +1,237 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h2 class="fw-extrabold text-white mb-0">Available Weekday Rides</h2>
+        <small class="text-light text-opacity-75">
+          Regular Campus Transportation (Hostel ⇄ Academic Block) • Monday to Friday Only
+        </small>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-warning text-dark fs-6 px-3 py-2 rounded-pill shadow-sm">
+          <i class="fa-solid fa-tag me-1"></i> Fixed Fare: Nu. 100 / Ride
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <!-- Weekday Availability Banner -->
+  <% if (!isWeekday) { %>
+    <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 mb-4">
+      <div class="d-flex align-items-center gap-3">
+        <i class="fa-solid fa-triangle-exclamation fs-2 text-warning"></i>
+        <div>
+          <h5 class="fw-bold mb-1">Weekend Notice: Regular Weekday Rides Operates Mon - Fri</h5>
+          <p class="small text-muted mb-0">
+            Today is <strong><%= currentDay %></strong>. Regular campus weekday rides between resident hostels and the Academic Block operate from <strong>Monday to Friday</strong>. For weekend transit to town or other districts, please use the <a href="/book-taxi" class="fw-bold text-dark">Book a Taxi</a> service.
+          </p>
+        </div>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="alert alert-success border-0 shadow-sm rounded-4 p-3 mb-4 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-3">
+        <i class="fa-solid fa-circle-check fs-3 text-success"></i>
+        <div>
+          <strong class="d-block text-dark">Weekday Service Active Today (<%= currentDay %>)</strong>
+          <small class="text-muted">Drivers are active and available on campus routes.</small>
+        </div>
+      </div>
+      <span class="badge bg-success px-3 py-2">Open for Requests</span>
+    </div>
+  <% } %>
+
+  <div class="row g-4">
+    <!-- Booking Request Form -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 80px;">
+        <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-paper-plane text-warning me-2"></i> Request Campus Ride</h5>
+
+        <form action="/weekday-rides" method="POST" id="weekdayRideForm">
+          <!-- Route Direction -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-navy">Select Campus Route *</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="routeDirection" id="routeH2C" value="Hostel to Academic Block" checked onchange="updateRouteLabels()">
+                <label class="btn btn-outline-primary w-100 py-2 text-center rounded-3 small fw-bold" for="routeH2C">
+                  <i class="fa-solid fa-arrow-right d-block mb-1 fs-5"></i>
+                  Hostel → Academic Block
+                </label>
+              </div>
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="routeDirection" id="routeC2H" value="Academic Block to Hostel" onchange="updateRouteLabels()">
+                <label class="btn btn-outline-primary w-100 py-2 text-center rounded-3 small fw-bold" for="routeC2H">
+                  <i class="fa-solid fa-arrow-left d-block mb-1 fs-5"></i>
+                  Academic Block → Hostel
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Specific Hostel Selection -->
+          <div class="mb-3">
+            <label for="hostelName" class="form-label fw-bold small text-navy" id="hostelFieldLabel">
+              <i class="fa-solid fa-hotel text-primary me-1"></i> Select Hostel (Pickup Point) *
+            </label>
+            <select class="form-select rounded-3" id="hostelName" name="hostelName" required>
+              <option value="" disabled selected>-- Select your Hostel --</option>
+              <optgroup label="DH Hostels">
+                <option value="DH1">DH1</option>
+                <option value="DH6">DH6</option>
+                <option value="DH7">DH7</option>
+                <option value="DH8">DH8</option>
+              </optgroup>
+              <optgroup label="Resident Hostels">
+                <option value="Yontenling">Yontenling</option>
+                <option value="Rabtenling">Rabtenling</option>
+                <option value="Gakiling">Gakiling</option>
+                <option value="Dekiling">Dekiling</option>
+                <option value="Pemaling">Pemaling</option>
+                <option value="Tshogyeling">Tshogyeling</option>
+                <option value="Yeatsholing">Yeatsholing</option>
+                <option value="Gatsheling">Gatsheling</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <!-- Academic Block Endpoint Display -->
+          <div class="mb-3 p-3 bg-light rounded-3 border">
+            <small class="text-muted d-block fw-semibold mb-1" id="routeSummaryLabel">Destination Drop-off:</small>
+            <div class="fw-bold text-navy fs-6">
+              <i class="fa-solid fa-building-columns text-warning me-1"></i> Academic Block
+            </div>
+          </div>
+
+          <!-- Available Driver Selector -->
+          <div class="mb-3">
+            <label for="driverId" class="form-label fw-bold small text-navy">Select Available Driver *</label>
+            <% if (availableDrivers && availableDrivers.length > 0) { %>
+              <select class="form-select rounded-3" id="driverId" name="driverId" required>
+                <option value="" disabled selected>-- Choose an available driver --</option>
+                <% availableDrivers.forEach(function(drv) { %>
+                  <option value="<%= drv.driver_id %>">
+                    <%= drv.full_name %> • <%= drv.vehicle_model %> (<%= drv.capacity %> pax capacity)
+                  </option>
+                <% }); %>
+              </select>
+            <% } else { %>
+              <div class="alert alert-warning py-2 small mb-0">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> No drivers currently marked as available for weekday rides.
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Remarks -->
+          <div class="mb-3">
+            <label for="remarks" class="form-label fw-bold small text-navy">Notes for Driver (Optional)</label>
+            <input type="text" class="form-control rounded-3" id="remarks" name="remarks" placeholder="e.g. Waiting in front of North Hostel Block A entrance">
+          </div>
+
+          <!-- Fare Summary Box -->
+          <div class="p-3 bg-light rounded-3 border mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="small text-muted">Fixed Campus Fare:</span>
+              <strong class="text-navy fs-5">Nu. 100.00</strong>
+            </div>
+            <small class="text-muted d-block mt-1">Pay cash directly to driver upon arrival at destination.</small>
+          </div>
+
+          <button type="submit" class="btn btn-warning text-dark fw-bold w-100 py-2 rounded-pill shadow-sm" <%= !isWeekday || availableDrivers.length === 0 ? 'disabled' : '' %>>
+            <i class="fa-solid fa-check me-1"></i> Submit Ride Request (Nu. 100)
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Available Drivers Directory -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+          <h5 class="fw-bold text-navy mb-0">
+            <i class="fa-solid fa-users text-primary me-2"></i> Verified Available Drivers
+          </h5>
+          <span class="badge bg-primary-subtle text-primary fw-semibold">
+            <%= availableDrivers.length %> Drivers Active
+          </span>
+        </div>
+
+        <% if (availableDrivers && availableDrivers.length > 0) { %>
+          <div class="row g-3">
+            <% availableDrivers.forEach(function(drv) { %>
+              <div class="col-12">
+                <div class="card border rounded-3 p-3 transition-hover">
+                  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 45px; height: 45px;">
+                        <%= drv.full_name.charAt(0) %>
+                      </div>
+                      <div>
+                        <h6 class="fw-bold text-navy mb-0"><%= drv.full_name %></h6>
+                        <small class="text-muted d-block">
+                          <i class="fa-solid fa-car text-secondary me-1"></i> <%= drv.vehicle_model %> (<%= drv.registration_number %>)
+                        </small>
+                        <small class="text-muted">
+                          <i class="fa-solid fa-id-card text-secondary me-1"></i> License: <%= drv.license_number %> • Capacity: <%= drv.capacity %> Pax
+                        </small>
+                      </div>
+                    </div>
+
+                    <div class="text-end">
+                      <span class="badge bg-success-subtle text-success fw-bold d-block mb-2">
+                        <i class="fa-solid fa-circle-dot me-1"></i> Available Now
+                      </span>
+                      <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" onclick="selectDriver('<%= drv.driver_id %>')">
+                        Select Driver
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5 text-muted">
+            <i class="fa-solid fa-car-side fs-1 opacity-50 mb-2"></i>
+            <p>No verified drivers are currently set to Available for weekday rides.</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function updateRouteLabels() {
+    const isH2C = document.getElementById('routeH2C').checked;
+    const label = document.getElementById('hostelFieldLabel');
+    const summary = document.getElementById('routeSummaryLabel');
+    if (isH2C) {
+      label.innerHTML = '<i class="fa-solid fa-hotel text-primary me-1"></i> Select Hostel (Pickup Point) *';
+      summary.textContent = 'Destination Drop-off:';
+    } else {
+      label.innerHTML = '<i class="fa-solid fa-hotel text-success me-1"></i> Select Hostel (Drop-off Destination) *';
+      summary.textContent = 'Pickup Origin Point:';
+    }
+  }
+
+  function selectDriver(driverId) {
+    const select = document.getElementById('driverId');
+    if (select) {
+      select.value = driverId;
+      select.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      select.classList.add('border-warning');
+      setTimeout(() => select.classList.remove('border-warning'), 1500);
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

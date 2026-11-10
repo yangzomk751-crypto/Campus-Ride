@@ -1,0 +1,99 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">Financial Records</span>
+        <h2 class="fw-extrabold text-white mb-0">Cash Payment History</h2>
+        <small class="text-light text-opacity-75">
+          Accountable records of cash transit fares paid to drivers upon journey completion.
+        </small>
+      </div>
+
+      <div>
+        <a href="/my-bookings" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-list-check me-1"></i> My Bookings
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold text-navy mb-0"><i class="fa-solid fa-receipt text-warning me-2"></i> All Trip Payments</h5>
+      <span class="badge bg-primary-subtle text-primary fw-semibold"><%= payments.length %> Payment Records</span>
+    </div>
+
+    <% if (payments && payments.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Booking Ref</th>
+              <th>Service & Destination</th>
+              <th>Date</th>
+              <th>Amount (Nu.)</th>
+              <th>Method</th>
+              <th>Payment Status</th>
+              <th>Assigned Driver</th>
+              <th class="pe-4 text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payments.forEach(function(p) { %>
+              <tr>
+                <td class="ps-4 fw-bold text-navy">
+                  #<%= p.booking_id %>
+                </td>
+                <td>
+                  <span class="badge bg-secondary me-1"><%= p.service_type %></span>
+                  <strong><%= p.destination %></strong>
+                  <small class="text-muted d-block">From: <%= p.pickup_location %></small>
+                </td>
+                <td>
+                  <small class="text-muted"><%= p.travel_date ? new Date(p.travel_date).toLocaleDateString() : 'N/A' %></small>
+                </td>
+                <td>
+                  <span class="fs-6 fw-bold text-navy">Nu. <%= parseFloat(p.amount || 0).toLocaleString() %></span>
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark border"><i class="fa-solid fa-money-bill-wave text-success me-1"></i> Cash</span>
+                </td>
+                <td>
+                  <% if (p.payment_status === 'Paid') { %>
+                    <span class="badge bg-success text-white"><i class="fa-solid fa-check me-1"></i> Paid</span>
+                  <% } else if (p.payment_status === 'Waived') { %>
+                    <span class="badge bg-info text-white"><i class="fa-solid fa-award me-1"></i> Waived</span>
+                  <% } else { %>
+                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-start me-1"></i> Pending</span>
+                  <% } %>
+                </td>
+                <td>
+                  <%= p.driver_name || 'Driver Allocation Pending' %>
+                </td>
+                <td class="pe-4 text-end">
+                  <a href="/bookings/<%= p.booking_id %>" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                    View Booking
+                  </a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5 text-muted">
+        <i class="fa-solid fa-wallet fs-1 opacity-50 mb-2"></i>
+        <p class="mb-0">No payment records found.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

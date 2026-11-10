@@ -1,0 +1,188 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+  
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">My Campus Rides & Bookings</h1>
+      <p class="text-sm text-slate-500">View your active reservations, digital boarding passes, and travel history</p>
+    </div>
+    <a href="/trips" class="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+      <i class="fa-solid fa-plus mr-1.5"></i> Book Another Ride
+    </a>
+  </div>
+
+  <% if (bookings && bookings.length > 0) { %>
+    <div class="space-y-4">
+      <% bookings.forEach(booking => { %>
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:shadow-sm transition flex flex-col md:flex-row md:items-center justify-between gap-4">
+          
+          <!-- Booking & Route Details -->
+          <div class="space-y-2 flex-grow">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-md bg-slate-100 text-slate-800 border border-slate-200">
+                <%= booking.booking_code %>
+              </span>
+
+              <% if (booking.status === 'CONFIRMED') { %>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  <i class="fa-solid fa-circle-check text-[10px] mr-1"></i> Confirmed
+                </span>
+              <% } else if (booking.status === 'COMPLETED') { %>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                  <i class="fa-solid fa-flag-checkered text-[10px] mr-1"></i> Completed
+                </span>
+              <% } else { %>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800">
+                  <i class="fa-solid fa-ban text-[10px] mr-1"></i> Cancelled
+                </span>
+              <% } %>
+
+              <span class="text-xs text-slate-400">
+                Booked on <%= new Date(booking.booked_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) %>
+              </span>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-900"><%= booking.route_name %></h3>
+
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-slate-600">
+              <div>
+                <span class="text-slate-400">From:</span>
+                <span class="font-semibold text-slate-800"><%= booking.origin_stop_name %></span>
+              </div>
+              <div>
+                <span class="text-slate-400">To:</span>
+                <span class="font-semibold text-slate-800"><%= booking.destination_stop_name %></span>
+              </div>
+              <div>
+                <span class="text-slate-400">Departure:</span>
+                <span class="font-bold text-brand-700">
+                  <%= new Date(booking.departure_time).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) %> 
+                  at <%= new Date(booking.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                </span>
+              </div>
+              <div>
+                <span class="text-slate-400">Seats:</span>
+                <span class="font-bold text-slate-800"><%= booking.seats_booked %></span>
+              </div>
+            </div>
+
+            <% if (booking.status === 'CANCELLED' && booking.cancellation_reason) { %>
+              <p class="text-xs text-rose-600 bg-rose-50 p-2 rounded-lg border border-rose-100">
+                <strong>Reason:</strong> <%= booking.cancellation_reason %>
+              </p>
+            <% } %>
+
+            <% if (booking.feedback_rating) { %>
+              <div class="flex items-center space-x-1 text-xs text-amber-500 font-semibold">
+                <span>Your Rating:</span>
+                <% for (let s = 1; s <= 5; s++) { %>
+                  <i class="fa-star <%= s <= booking.feedback_rating ? 'fa-solid' : 'fa-regular text-slate-300' %>"></i>
+                <% } %>
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap items-center gap-2 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
+            <% if (booking.status === 'CONFIRMED') { %>
+              <a href="/bookings/<%= booking.id %>/ticket" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-qrcode"></i>
+                <span>Boarding Pass</span>
+              </a>
+
+              <form action="/bookings/<%= booking.id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this booking? Your seat will be freed up for other students.');">
+                <button type="submit" class="px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition">
+                  Cancel
+                </button>
+              </form>
+            <% } else if (booking.status === 'COMPLETED' && !booking.feedback_rating) { %>
+              <button onclick="openFeedbackModal(<%= booking.id %>, <%= booking.trip_id %>, '<%= booking.route_name %>')" 
+                class="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold text-xs rounded-xl transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-star text-amber-500"></i>
+                <span>Rate Ride</span>
+              </button>
+            <% } %>
+          </div>
+
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
+      <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl mx-auto mb-3">
+        <i class="fa-solid fa-ticket-simple"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 mb-1">No bookings found</h3>
+      <p class="text-xs text-slate-500 mb-4 max-w-sm mx-auto">
+        You haven't reserved any campus shuttles yet. Explore the schedules to make your first reservation.
+      </p>
+      <a href="/trips" class="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl transition">
+        Browse Available Rides &rarr;
+      </a>
+    </div>
+  <% } %>
+
+  <!-- Feedback Modal -->
+  <div id="feedbackModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-base font-bold text-slate-900">Rate Your Ride</h3>
+        <button type="button" onclick="closeFeedbackModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      
+      <p id="modalRouteName" class="text-xs text-slate-600 mb-4 font-semibold"></p>
+
+      <form action="/feedback" method="POST" class="space-y-4">
+        <input type="hidden" id="modalBookingId" name="bookingId" value="">
+        <input type="hidden" id="modalTripId" name="tripId" value="">
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-2">Rating</label>
+          <div class="flex items-center space-x-2 text-2xl text-amber-400 cursor-pointer" id="starContainer">
+            <input type="radio" name="rating" value="5" id="star5" class="hidden" checked><label for="star5" class="hover:scale-110 transition">★</label>
+            <input type="radio" name="rating" value="4" id="star4" class="hidden"><label for="star4" class="hover:scale-110 transition">★</label>
+            <input type="radio" name="rating" value="3" id="star3" class="hidden"><label for="star3" class="hover:scale-110 transition">★</label>
+            <input type="radio" name="rating" value="2" id="star2" class="hidden"><label for="star2" class="hover:scale-110 transition">★</label>
+            <input type="radio" name="rating" value="1" id="star1" class="hidden"><label for="star1" class="hover:scale-110 transition">★</label>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Feedback Comments</label>
+          <textarea name="comment" rows="3" placeholder="How was the driver and punctuality?"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="closeFeedbackModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-xs">
+            Submit Review
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  function openFeedbackModal(bookingId, tripId, routeName) {
+    document.getElementById('modalBookingId').value = bookingId;
+    document.getElementById('modalTripId').value = tripId;
+    document.getElementById('modalRouteName').textContent = 'Route: ' + routeName;
+    document.getElementById('feedbackModal').classList.remove('hidden');
+  }
+
+  function closeFeedbackModal() {
+    document.getElementById('feedbackModal').classList.add('hidden');
+  }
+</script>
+
+<%- include('../partials/footer') %>

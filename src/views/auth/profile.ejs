@@ -1,0 +1,58 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
+  <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+    <div class="bg-gradient-to-r from-brand-700 to-brand-600 px-6 py-8 text-white">
+      <div class="flex items-center space-x-4">
+        <div class="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-2xl font-bold border border-white/30">
+          <%= user.full_name.charAt(0) %>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold"><%= user.full_name %></h1>
+          <p class="text-xs text-brand-100 flex items-center space-x-2 mt-1">
+            <span><%= user.email %></span>
+            <span>•</span>
+            <span class="uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full bg-white/20 text-[10px]">
+              <%= user.role %>
+            </span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">Account Information</h3>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <dt class="text-xs font-medium text-slate-500">Student / Staff ID</dt>
+          <dd class="text-sm font-semibold text-slate-800 mt-1"><%= user.student_staff_id || 'Not specified' %></dd>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <dt class="text-xs font-medium text-slate-500">Phone Contact</dt>
+          <dd class="text-sm font-semibold text-slate-800 mt-1"><%= user.phone || 'Not specified' %></dd>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <dt class="text-xs font-medium text-slate-500">System Role</dt>
+          <dd class="text-sm font-semibold text-slate-800 mt-1 capitalize"><%= user.role %></dd>
+        </div>
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <dt class="text-xs font-medium text-slate-500">Member Since</dt>
+          <dd class="text-sm font-semibold text-slate-800 mt-1"><%= new Date(user.created_at).toLocaleDateString() %></dd>
+        </div>
+      </dl>
+
+      <div class="mt-8 pt-6 border-t border-slate-100 flex justify-between items-center">
+        <a href="/my-bookings" class="inline-flex items-center text-sm font-semibold text-brand-600 hover:text-brand-800">
+          <i class="fa-solid fa-ticket mr-2"></i> View My Bookings
+        </a>
+        <a href="/logout" class="px-4 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold text-xs rounded-xl transition">
+          <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Log Out
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

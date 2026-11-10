@@ -1,0 +1,94 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">Fleet Registry</span>
+        <h2 class="fw-extrabold text-white mb-0">Vehicle Information</h2>
+        <small class="text-light text-opacity-75">
+          Sherubtse verified transportation provider details.
+        </small>
+      </div>
+
+      <div>
+        <a href="/driver" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-gauge me-1"></i> Driver Console
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <h4 class="fw-bold text-navy mb-4"><i class="fa-solid fa-car text-primary me-2"></i> Assigned Vehicle Specifications</h4>
+
+        <% if (driver.registration_number) { %>
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              <div class="p-3 bg-light rounded-3 border">
+                <small class="text-muted text-uppercase fw-semibold d-block">Registration Number</small>
+                <strong class="text-navy fs-5"><%= driver.registration_number %></strong>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="p-3 bg-light rounded-3 border">
+                <small class="text-muted text-uppercase fw-semibold d-block">Vehicle Model</small>
+                <strong class="text-navy fs-5"><%= driver.vehicle_model %></strong>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="p-3 bg-light rounded-3 border">
+                <small class="text-muted text-uppercase fw-semibold d-block">Vehicle Classification</small>
+                <strong class="text-navy"><%= driver.vehicle_type %></strong>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="p-3 bg-light rounded-3 border">
+                <small class="text-muted text-uppercase fw-semibold d-block">Max Passenger Capacity</small>
+                <strong class="text-navy"><%= driver.capacity %> Passengers</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert alert-success border-0 py-2 small mb-0">
+            <i class="fa-solid fa-circle-check me-1"></i> Vehicle registered and authorized for campus operations under license BT-DRV.
+          </div>
+        <% } else { %>
+          <div class="alert alert-warning py-3 text-muted">
+            <i class="fa-solid fa-circle-info me-2 text-warning"></i> No specific vehicle is currently bound to your driver profile. Please contact the Transport Office to assign your vehicle.
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
+        <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-id-card text-warning me-2"></i> Driver Credentials</h5>
+        <ul class="list-unstyled small text-muted mb-0">
+          <li class="py-2 border-bottom"><strong>Driver Name:</strong> <%= driver.full_name %></li>
+          <li class="py-2 border-bottom"><strong>Phone:</strong> <%= driver.phone %></li>
+          <li class="py-2 border-bottom"><strong>Driving License:</strong> <%= driver.license_number %></li>
+          <li class="py-2 border-bottom">
+            <strong>Verification Status:</strong>
+            <span class="badge bg-success text-white"><%= driver.verification_status %></span>
+          </li>
+          <li class="py-2">
+            <strong>Campus Weekday Rides:</strong>
+            <span class="badge <%= driver.weekday_available ? 'bg-warning text-dark' : 'bg-secondary' %>">
+              <%= driver.weekday_available ? 'Active (Nu. 100)' : 'Inactive' %>
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

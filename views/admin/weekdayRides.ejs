@@ -1,0 +1,114 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h2 class="fw-extrabold text-white mb-0">Manage Weekday Rides (Hostel ⇄ Academic Block)</h2>
+        <small class="text-light text-opacity-75">
+          Regular student and staff campus shuttle operations • Fixed Fare: Nu. 100 • Mon - Fri
+        </small>
+      </div>
+
+      <div>
+        <a href="/admin/bookings" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-arrow-left me-1"></i> All Bookings
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <!-- Available Weekday Drivers Overview -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+    <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-users text-warning me-2"></i> Drivers Configured for Weekday Rides (<%= availableDrivers.length %> Active)</h5>
+    <div class="row g-2">
+      <% availableDrivers.forEach(function(drv) { %>
+        <div class="col-md-4">
+          <div class="p-3 bg-light rounded-3 border d-flex align-items-center gap-3">
+            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+              <%= drv.full_name.charAt(0) %>
+            </div>
+            <div>
+              <strong class="d-block text-navy small"><%= drv.full_name %></strong>
+              <small class="text-muted"><%= drv.vehicle_model %> (<%= drv.registration_number %>)</small>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+
+  <!-- Weekday Rides Table -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold text-navy mb-0"><i class="fa-solid fa-person-walking-luggage text-warning me-2"></i> Weekday Ride Bookings (<%= bookings.length %>)</h5>
+    </div>
+
+    <% if (bookings && bookings.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Ref #</th>
+              <th>Passenger</th>
+              <th>Route Direction</th>
+              <th>Pickup Point</th>
+              <th>Date / Time</th>
+              <th>Assigned Driver</th>
+              <th>Status</th>
+              <th>Fare</th>
+              <th class="pe-4 text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% bookings.forEach(function(b) { %>
+              <tr>
+                <td class="ps-4 fw-bold text-navy">#<%= b.booking_id %></td>
+                <td>
+                  <strong><%= b.passenger_name %></strong>
+                  <small class="text-muted d-block"><%= b.passenger_phone %></small>
+                </td>
+                <td>
+                  <span class="badge bg-warning text-dark fw-bold"><%= b.destination %></span>
+                </td>
+                <td><%= b.pickup_location %></td>
+                <td><small class="text-muted"><%= b.travel_date %> <%= b.departure_time %></small></td>
+                <td><%= b.driver_name || 'Driver Allocation Pending' %></td>
+                <td>
+                  <% if (b.booking_status === 'Confirmed') { %>
+                    <span class="badge bg-primary text-white">Confirmed</span>
+                  <% } else if (b.booking_status === 'In Progress') { %>
+                    <span class="badge bg-info text-dark">In Progress</span>
+                  <% } else if (b.booking_status === 'Completed') { %>
+                    <span class="badge bg-success text-white">Completed</span>
+                  <% } else if (b.booking_status === 'Cancelled' || b.booking_status === 'Rejected') { %>
+                    <span class="badge bg-danger text-white"><%= b.booking_status %></span>
+                  <% } else { %>
+                    <span class="badge bg-warning text-dark">Pending</span>
+                  <% } %>
+                </td>
+                <td><strong class="text-navy">Nu. 100</strong></td>
+                <td class="pe-4 text-end">
+                  <a href="/bookings/<%= b.booking_id %>" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                    View
+                  </a>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5 text-muted">
+        <p class="mb-0">No weekday rides found.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

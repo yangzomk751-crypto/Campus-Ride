@@ -1,0 +1,110 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-info text-white fw-bold mb-1 text-uppercase">Heavy Vehicle Operator</span>
+        <h2 class="fw-extrabold text-white mb-0">Assigned Campus Bus Trips</h2>
+        <small class="text-light text-opacity-75">
+          Driver: <%= driver.full_name %> • Official institutional bus assignments managed by College Admin.
+        </small>
+      </div>
+
+      <div>
+        <a href="/driver" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-gauge me-1"></i> Driver Console
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+      <h5 class="fw-bold text-navy mb-0">
+        <i class="fa-solid fa-bus text-info me-2"></i> Official Bus Trip Schedule (<%= trips.length %>)
+      </h5>
+      <span class="text-muted small">Campus bus reservations</span>
+    </div>
+
+    <% if (trips && trips.length > 0) { %>
+      <div class="row g-3">
+        <% trips.forEach(function(t) { %>
+          <div class="col-md-6">
+            <div class="card border rounded-3 p-4 bg-light h-100 transition-hover border-top border-4 border-info">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-info text-white fw-bold">Campus Bus Reservation</span>
+                <span class="badge <%= t.booking_status === 'Completed' ? 'bg-success text-white' : (t.booking_status === 'In Progress' ? 'bg-info text-dark' : 'bg-primary text-white') %>">
+                  <%= t.booking_status %>
+                </span>
+              </div>
+
+              <h5 class="fw-bold text-navy mb-1"><%= t.destination %></h5>
+              <small class="text-muted d-block mb-3">
+                <i class="fa-solid fa-location-dot text-primary me-1"></i> Pickup: <%= t.pickup_location %>
+              </small>
+
+              <div class="p-3 bg-white rounded-3 border small mb-3">
+                <div class="d-flex justify-content-between py-1 border-bottom">
+                  <span class="text-muted">Travel Date & Time:</span>
+                  <strong><%= t.travel_date %> at <%= t.departure_time %></strong>
+                </div>
+                <div class="d-flex justify-content-between py-1 border-bottom">
+                  <span class="text-muted">Group Leader:</span>
+                  <strong><%= t.passenger_name %> (<%= t.passenger_phone %>)</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1 border-bottom">
+                  <span class="text-muted">Passenger Count:</span>
+                  <strong class="text-info"><%= t.passenger_count %> Passengers</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                  <span class="text-muted">Agreed Fare:</span>
+                  <strong class="text-navy">Nu. <%= parseFloat(t.total_fare || 0).toLocaleString() %></strong>
+                </div>
+              </div>
+
+              <% if (t.trip_purpose) { %>
+                <div class="small text-muted p-2 bg-white rounded border mb-3">
+                  <strong>Trip Purpose:</strong> <%= t.trip_purpose %>
+                </div>
+              <% } %>
+
+              <!-- Status Update Action -->
+              <div class="mt-auto pt-2 border-top">
+                <% if (t.booking_status !== 'Completed' && t.booking_status !== 'Cancelled') { %>
+                  <form action="/driver/trips/<%= t.booking_id %>/status" method="POST" class="d-flex gap-2">
+                    <select name="status" class="form-select form-select-sm rounded-pill">
+                      <option value="In Progress" <%= t.booking_status === 'In Progress' ? 'selected' : '' %>>Mark In Progress</option>
+                      <option value="Completed">Mark Completed</option>
+                    </select>
+                    <button type="submit" class="btn btn-info btn-sm text-white fw-bold rounded-pill px-3">
+                      Update Status
+                    </button>
+                  </form>
+                <% } else { %>
+                  <span class="badge bg-success-subtle text-success py-2 w-100 d-block">
+                    <i class="fa-solid fa-check me-1"></i> Bus Trip Completed
+                  </span>
+                <% } %>
+              </div>
+
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5 text-muted">
+        <i class="fa-solid fa-bus fs-1 opacity-50 mb-3"></i>
+        <h6 class="fw-bold text-navy">No bus trips currently assigned to you</h6>
+        <p class="small mb-0">Assignments managed by the College Transport Administrator will appear here.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

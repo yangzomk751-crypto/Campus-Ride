@@ -1,0 +1,170 @@
+<%- include('../partials/header') %>
+  <%- include('../partials/navbar') %>
+
+    <div class="bg-navy py-5 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+      <div class="container py-3">
+        <div class="max-w-700">
+          <span class="badge bg-warning text-dark fw-bold mb-2 text-uppercase">Transparent Transportation Rates</span>
+          <h1 class="display-5 fw-extrabold text-white mb-2">Travel & Route Fare Chart</h1>
+          <p class="lead text-light text-opacity-90">
+            Standard taxi & group bus rates from Kanglung (Sherubtse) to destinations across Bhutan & local campus
+            routes.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container py-5">
+      <!-- Informational Callout -->
+      <div class="alert alert-info border-0 shadow-sm rounded-4 p-4 mb-4">
+        <div class="d-flex align-items-start gap-3">
+          <i class="fa-solid fa-circle-info fs-3 text-primary mt-1"></i>
+          <div>
+            <h5 class="fw-bold mb-1">How Campus Ride Fares Work</h5>
+            <p class="small text-muted mb-2">
+              • <strong>Bus Bookings:</strong> Available for groups of friends going on trips, outings, picnics,
+              vacations, or student group travels. Quoted as <em>per-passenger</em> rates (or group hire for unlisted
+              routes).<br>
+              • <strong>Taxi Fares:</strong> Quoted as <em>whole-vehicle hire (1 to 4 passengers)</em>. When opting for
+              <strong>Ride Sharing</strong>, the total vehicle fare is divided evenly among participating passengers
+              (e.g., Nu. 500 / 2 pax = Nu. 250 each).<br>
+              • <strong>Weekday Campus Rides:</strong> Fixed at <strong>Nu. 100 per ride</strong> between Hostels (DH1, DH6, DH7, DH8, Yontenling, Rabtenling, Gakiling, Dekiling, Pemaling, Tshogyeling, Yeatsholing, Gatsheling) and Academic Block.<br>
+              • <strong>Unlisted Destinations:</strong> Passengers can submit a custom destination request for a
+              tailored group or taxi quotation.<br>
+              • <strong>Note:</strong> Taxis and buses are privately operated by verified local drivers and transport
+              operators partnering with the platform — they are not college-owned vehicles.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Filter Bar -->
+      <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-4">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text bg-light border-0"><i
+                  class="fa-solid fa-magnifying-glass text-muted"></i></span>
+              <input type="text" id="fareSearchInput" class="form-control bg-light border-0"
+                placeholder="Search destination (e.g., Trashigang, Thimphu, Hostel)...">
+            </div>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <span class="text-muted small">Showing <strong id="rateCount">
+                <%= rates.length %>
+              </strong> active destinations</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fare Table -->
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" id="fareRatesTable">
+            <thead class="table-dark" style="background-color: var(--dark-navy);">
+              <tr>
+                <th class="ps-4 py-3" style="width: 30%;">Destination / Route</th>
+                <th class="py-3 text-center" style="width: 20%;">
+                  <i class="fa-solid fa-bus text-info me-1"></i> Bus Fare (Nu.)
+                  <span class="d-block small text-light text-opacity-75 fw-normal">Per Passenger</span>
+                </th>
+                <th class="py-3 text-center" style="width: 20%;">
+                  <i class="fa-solid fa-taxi text-warning me-1"></i> Taxi Fare (Nu.)
+                  <span class="d-block small text-light text-opacity-75 fw-normal">Whole Vehicle Hire</span>
+                </th>
+                <th class="py-3 text-center" style="width: 15%;">
+                  <i class="fa-solid fa-users text-success me-1"></i> Shared Taxi (4 Pax)
+                  <span class="d-block small text-light text-opacity-75 fw-normal">Per Passenger Est.</span>
+                </th>
+                <th class="pe-4 py-3 text-end" style="width: 15%;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (rates && rates.length> 0) { %>
+                <% rates.forEach(function(r) { const busFare=parseFloat(r.bus_fare); const
+                  taxiFare=parseFloat(r.taxi_fare); const sharedFare=Math.round((taxiFare / 4) * 100) / 100; const
+                  isLocal=r.destination.includes('Hostel') || r.destination.includes('Classroom') || r.destination.includes('Academic Block'); %>
+                  <tr class="rate-row <%= isLocal ? 'table-warning-subtle' : '' %>">
+                    <td class="ps-4 py-3">
+                      <div class="d-flex align-items-center gap-2">
+                        <% if (isLocal) { %>
+                          <span class="badge bg-warning text-dark"><i class="fa-solid fa-graduation-cap me-1"></i>
+                            Campus Route</span>
+                          <% } else { %>
+                            <span class="badge bg-primary-subtle text-primary"><i class="fa-solid fa-mountain me-1"></i>
+                              Dzongkhag</span>
+                            <% } %>
+                              <span class="fw-bold text-navy destination-name">
+                                <%= r.destination %>
+                              </span>
+                      </div>
+                      <% if (r.notes) { %>
+                        <small class="text-muted d-block ps-1">
+                          <%= r.notes %>
+                        </small>
+                        <% } %>
+                    </td>
+                    <td class="text-center py-3">
+                      <span class="fs-5 fw-bold text-navy">Nu. <%= busFare.toLocaleString() %></span>
+                    </td>
+                    <td class="text-center py-3">
+                      <span class="fs-5 fw-bold text-navy">Nu. <%= taxiFare.toLocaleString() %></span>
+                    </td>
+                    <td class="text-center py-3">
+                      <span class="badge bg-success-subtle text-success fw-bold fs-6 px-3 py-1">
+                        Nu. <%= sharedFare.toLocaleString() %>
+                      </span>
+                    </td>
+                    <td class="pe-4 py-3 text-end">
+                      <% if (isLocal) { %>
+                        <a href="/weekday-rides" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill">
+                          Book Weekday
+                        </a>
+                        <% } else { %>
+                          <div class="d-inline-flex gap-1">
+                            <a href="/book-taxi" class="btn btn-outline-primary btn-sm rounded-pill fw-semibold"
+                              title="Book Taxi">
+                              <i class="fa-solid fa-taxi me-1"></i> Taxi
+                            </a>
+                            <a href="/book-bus" class="btn btn-outline-info btn-sm rounded-pill fw-semibold"
+                              title="Book Bus for Group">
+                              <i class="fa-solid fa-bus me-1"></i> Bus
+                            </a>
+                          </div>
+                          <% } %>
+                    </td>
+                  </tr>
+                  <% }); %>
+                    <% } else { %>
+                      <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">No fare rates available.</td>
+                      </tr>
+                      <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Live Search Filtering for Fare Rates
+      document.getElementById('fareSearchInput').addEventListener('input', function (e) {
+        const q = e.target.value.toLowerCase().trim();
+        const rows = document.querySelectorAll('.rate-row');
+        let visibleCount = 0;
+
+        rows.forEach(function (row) {
+          const dest = row.querySelector('.destination-name').textContent.toLowerCase();
+          if (dest.includes(q)) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+
+        document.getElementById('rateCount').textContent = visibleCount;
+      });
+    </script>
+
+    <%- include('../partials/footer') %>

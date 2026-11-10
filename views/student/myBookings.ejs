@@ -1,0 +1,155 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">Booking History</span>
+        <h2 class="fw-extrabold text-white mb-0">My Transport Bookings</h2>
+        <small class="text-light text-opacity-75">
+          View all your current and past weekday rides, taxi hires, and college bus requests.
+        </small>
+      </div>
+
+      <div class="d-flex gap-2">
+        <a href="/weekday-rides" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3">
+          <i class="fa-solid fa-person-walking-luggage me-1"></i> Weekday Ride
+        </a>
+        <a href="/book-taxi" class="btn btn-primary btn-sm fw-bold rounded-pill px-3">
+          <i class="fa-solid fa-taxi me-1"></i> Book Taxi
+        </a>
+        <a href="/book-bus" class="btn btn-info btn-sm text-white fw-bold rounded-pill px-3">
+          <i class="fa-solid fa-bus me-1"></i> Request Bus
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <!-- Status Filter Pills -->
+  <div class="d-flex flex-wrap gap-2 mb-4 pb-2 border-bottom">
+    <a href="/my-bookings?status=all" class="btn btn-sm <%= currentStatus === 'all' ? 'btn-primary' : 'btn-outline-secondary' %> rounded-pill px-3">
+      All Bookings (<%= bookings.length %>)
+    </a>
+    <a href="/my-bookings?status=Pending" class="btn btn-sm <%= currentStatus === 'Pending' ? 'btn-warning text-dark fw-bold' : 'btn-outline-warning text-dark' %> rounded-pill px-3">
+      <i class="fa-solid fa-hourglass-start me-1"></i> Pending
+    </a>
+    <a href="/my-bookings?status=Confirmed" class="btn btn-sm <%= currentStatus === 'Confirmed' ? 'btn-primary' : 'btn-outline-primary' %> rounded-pill px-3">
+      <i class="fa-solid fa-circle-check me-1"></i> Confirmed
+    </a>
+    <a href="/my-bookings?status=In Progress" class="btn btn-sm <%= currentStatus === 'In Progress' ? 'btn-info text-dark fw-bold' : 'btn-outline-info text-dark' %> rounded-pill px-3">
+      <i class="fa-solid fa-spinner me-1"></i> In Progress
+    </a>
+    <a href="/my-bookings?status=Completed" class="btn btn-sm <%= currentStatus === 'Completed' ? 'btn-success' : 'btn-outline-success' %> rounded-pill px-3">
+      <i class="fa-solid fa-flag-checkered me-1"></i> Completed
+    </a>
+    <a href="/my-bookings?status=Cancelled" class="btn btn-sm <%= currentStatus === 'Cancelled' ? 'btn-danger' : 'btn-outline-danger' %> rounded-pill px-3">
+      <i class="fa-solid fa-ban me-1"></i> Cancelled
+    </a>
+  </div>
+
+  <% if (bookings && bookings.length > 0) { %>
+    <div class="row g-3">
+      <% bookings.forEach(function(b) { %>
+        <div class="col-md-6 col-lg-4">
+          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 transition-hover border-top border-4 <%= b.service_type === 'Weekday Ride' ? 'border-warning' : (b.service_type === 'Taxi' ? 'border-primary' : 'border-info') %>">
+            
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge <%= b.service_type === 'Weekday Ride' ? 'bg-warning text-dark' : (b.service_type === 'Taxi' ? 'bg-primary' : 'bg-info text-white') %> fw-bold">
+                <%= b.service_type %>
+              </span>
+
+              <% if (b.booking_status === 'Confirmed') { %>
+                <span class="badge bg-primary text-white"><i class="fa-solid fa-check me-1"></i> Confirmed</span>
+              <% } else if (b.booking_status === 'In Progress') { %>
+                <span class="badge bg-info text-dark"><i class="fa-solid fa-spinner fa-spin me-1"></i> In Progress</span>
+              <% } else if (b.booking_status === 'Completed') { %>
+                <span class="badge bg-success text-white"><i class="fa-solid fa-flag-checkered me-1"></i> Completed</span>
+              <% } else if (b.booking_status === 'Cancelled' || b.booking_status === 'Rejected') { %>
+                <span class="badge bg-danger text-white"><i class="fa-solid fa-xmark me-1"></i> <%= b.booking_status %></span>
+              <% } else { %>
+                <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-start me-1"></i> Pending</span>
+              <% } %>
+            </div>
+
+            <h5 class="fw-bold text-navy mb-1 text-truncate" title="<%= b.destination %>">
+              <%= b.destination %>
+            </h5>
+            <small class="text-muted d-block mb-3">
+              <i class="fa-solid fa-location-dot text-primary me-1"></i> From: <%= b.pickup_location %>
+            </small>
+
+            <div class="p-2 bg-light rounded-3 border small mb-3">
+              <div class="d-flex justify-content-between py-1 border-bottom">
+                <span class="text-muted">Travel Date:</span>
+                <strong><%= b.travel_date %> at <%= b.departure_time %></strong>
+              </div>
+              <div class="d-flex justify-content-between py-1 border-bottom">
+                <span class="text-muted">Passengers:</span>
+                <strong><%= b.passenger_count %> Pax <%= b.ride_sharing_opted ? '(Shared)' : '' %></strong>
+              </div>
+              <div class="d-flex justify-content-between py-1 border-bottom">
+                <span class="text-muted">Total Fare:</span>
+                <strong class="text-navy">
+                  <% if (b.total_fare && parseFloat(b.total_fare) > 0) { %>
+                    Nu. <%= parseFloat(b.total_fare).toLocaleString() %>
+                  <% } else if (b.quotation_status === 'Pending Admin Quotation') { %>
+                    <span class="text-warning">Quote Pending</span>
+                  <% } else { %>
+                    Nu. 0.00
+                  <% } %>
+                </strong>
+              </div>
+              <div class="d-flex justify-content-between py-1">
+                <span class="text-muted">Cash Payment:</span>
+                <% if (b.payment_status === 'Paid') { %>
+                  <span class="badge bg-success text-white">Paid</span>
+                <% } else if (b.payment_status === 'Waived') { %>
+                  <span class="badge bg-info text-white">Waived</span>
+                <% } else { %>
+                  <span class="badge bg-warning text-dark">Pending</span>
+                <% } %>
+              </div>
+            </div>
+
+            <% if (b.driver_name) { %>
+              <div class="small text-muted mb-3">
+                <i class="fa-solid fa-id-badge text-success me-1"></i> Driver: <strong><%= b.driver_name %></strong> (<%= b.driver_phone %>)
+              </div>
+            <% } %>
+
+            <% if (b.quotation_status === 'Quoted') { %>
+              <div class="alert alert-danger py-2 small mb-3">
+                <i class="fa-solid fa-bell me-1"></i> <strong>Admin Quotation:</strong> Nu. <%= b.quoted_fare %>
+              </div>
+            <% } %>
+
+            <div class="mt-auto pt-2 border-top text-end">
+              <a href="/bookings/<%= b.booking_id %>" class="btn btn-outline-primary btn-sm rounded-pill px-3 w-100">
+                View Details & Tracking <i class="fa-solid fa-chevron-right ms-1"></i>
+              </a>
+            </div>
+
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } else { %>
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center bg-white">
+      <i class="fa-solid fa-calendar-xmark display-4 text-muted opacity-50 mb-3"></i>
+      <h5 class="fw-bold text-navy">No bookings found</h5>
+      <p class="text-muted small mb-4">You have not submitted any bookings in this status.</p>
+      <div class="d-flex justify-content-center gap-2">
+        <a href="/weekday-rides" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3">Weekday Ride</a>
+        <a href="/book-taxi" class="btn btn-primary btn-sm fw-bold rounded-pill px-3">Book Taxi</a>
+        <a href="/book-bus" class="btn btn-info btn-sm text-white fw-bold rounded-pill px-3">Request Bus</a>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

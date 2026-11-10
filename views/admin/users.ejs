@@ -1,0 +1,126 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h2 class="fw-extrabold text-dark mb-0">Student & User Management</h2>
+        <span class="badge bg-danger text-uppercase">Admin</span>
+      </div>
+      <p class="text-muted small mb-0">Manage registered students, drivers, account statuses, and permissions</p>
+    </div>
+    <a href="/admin" class="btn btn-outline-secondary btn-sm">
+      <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Search & Filters -->
+  <div class="card card-campus border-0 shadow-sm p-3 mb-4 bg-white">
+    <form action="/admin/users" method="GET" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label small fw-bold text-dark mb-1">Search Students / Drivers</label>
+        <input type="text" name="search" class="form-control form-control-sm" placeholder="Name, college email, or student ID..." value="<%= filters.search %>">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-dark mb-1">Role</label>
+        <select name="role" class="form-select form-select-sm">
+          <option value="all" <%= filters.role === 'all' ? 'selected' : '' %>>All Roles</option>
+          <option value="passenger" <%= filters.role === 'passenger' ? 'selected' : '' %>>Passenger</option>
+          <option value="driver" <%= filters.role === 'driver' ? 'selected' : '' %>>Driver</option>
+          <option value="admin" <%= filters.role === 'admin' ? 'selected' : '' %>>Admin</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-bold text-dark mb-1">Status</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+          <option value="active" <%= filters.status === 'active' ? 'selected' : '' %>>Active</option>
+          <option value="suspended" <%= filters.status === 'suspended' ? 'selected' : '' %>>Suspended</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary-blue btn-sm w-100 fw-bold">
+          <i class="fa-solid fa-filter me-1"></i> Apply Filter
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+    <% if (users && users.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 small">
+          <thead class="table-light">
+            <tr>
+              <th>Full Name & Email</th>
+              <th>Student ID</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Verification</th>
+              <th>Status</th>
+              <th class="text-end">Manage Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(u => { %>
+              <tr>
+                <td>
+                  <strong class="text-dark d-block"><%= u.full_name %></strong>
+                  <span class="text-muted" style="font-size: 0.75rem;"><%= u.email %></span>
+                </td>
+                <td><code><%= u.student_id || 'STU-N/A' %></code></td>
+                <td><%= u.phone %></td>
+                <td>
+                  <span class="badge <%= u.role === 'driver' ? 'bg-warning text-dark' : (u.role === 'admin' ? 'bg-danger' : 'bg-primary') %> text-uppercase">
+                    <%= u.role %>
+                  </span>
+                </td>
+                <td>
+                  <% if (u.role === 'driver') { %>
+                    <span class="badge <%= u.verification_status === 'Verified' ? 'badge-status-verified' : 'badge-status-pending' %>">
+                      <%= u.verification_status || 'Pending' %>
+                    </span>
+                  <% } else { %>
+                    <span class="text-muted">N/A</span>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="badge <%= u.status === 'active' ? 'badge-status-resolved' : 'badge-status-cancelled' %>">
+                    <%= u.status %>
+                  </span>
+                </td>
+                <td class="text-end">
+                  <% if (u.role !== 'admin') { %>
+                    <form action="/admin/users/<%= u.user_id %>/status" method="POST" class="d-inline">
+                      <% if (u.status === 'active') { %>
+                        <input type="hidden" name="status" value="suspended">
+                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;" onclick="return confirm('Suspend user <%= u.full_name %>?');">
+                          <i class="fa-solid fa-user-slash me-1"></i> Suspend
+                        </button>
+                      <% } else { %>
+                        <input type="hidden" name="status" value="active">
+                        <button type="submit" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 0.75rem;">
+                          <i class="fa-solid fa-user-check me-1"></i> Activate
+                        </button>
+                      <% } %>
+                    </form>
+                  <% } else { %>
+                    <span class="text-muted small">Admin Root</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state py-4">
+        <p class="text-muted small mb-0">No users found matching current filters.</p>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

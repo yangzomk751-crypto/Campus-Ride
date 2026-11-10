@@ -1,0 +1,153 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      
+      <div class="card card-campus border-0 shadow-lg p-4 p-md-5 bg-white rounded-4">
+        <div class="text-center mb-4">
+          <div class="navbar-brand-logo mx-auto mb-2" style="width: 52px; height: 52px; font-size: 1.5rem;">
+            <i class="fa-solid fa-user-plus"></i>
+          </div>
+          <h3 class="fw-extrabold text-navy">Join Campus Ride</h3>
+          <p class="text-muted small">Sherubtse College Campus Transport Booking Portal</p>
+        </div>
+
+        <form action="/register" method="POST" id="registerForm">
+          <!-- Full Name -->
+          <div class="mb-3">
+            <label for="fullName" class="form-label fw-bold small text-navy">Full Name *</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-user"></i></span>
+              <input type="text" class="form-control" id="fullName" name="fullName" required placeholder="e.g. Sonam Choden" value="<%= typeof formData !== 'undefined' && formData.fullName ? formData.fullName : '' %>">
+            </div>
+          </div>
+
+          <!-- Email & Phone -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="email" class="form-label fw-bold small text-navy">College Email Address *</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-envelope"></i></span>
+                <input type="email" class="form-control" id="email" name="email" required placeholder="name@sherubtse.edu.bt" value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label for="phone" class="form-label fw-bold small text-navy">Mobile Phone Number *</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-phone"></i></span>
+                <input type="tel" class="form-control" id="phone" name="phone" required placeholder="+975-17XXXXXX" value="<%= typeof formData !== 'undefined' && formData.phone ? formData.phone : '' %>">
+              </div>
+            </div>
+          </div>
+
+          <!-- Primary Role Selection -->
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-navy d-block">Account Type *</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="role" id="rolePassenger" value="passenger" checked onchange="toggleRoleFields()">
+                <label class="btn btn-outline-primary w-100 py-2 text-start d-flex align-items-center gap-2 rounded-3" for="rolePassenger">
+                  <i class="fa-solid fa-user fs-5"></i>
+                  <div>
+                    <strong class="d-block small">Passenger</strong>
+                    <span class="text-muted" style="font-size: 0.7rem;">Student or Staff</span>
+                  </div>
+                </label>
+              </div>
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="role" id="roleDriver" value="driver" onchange="toggleRoleFields()">
+                <label class="btn btn-outline-warning text-dark w-100 py-2 text-start d-flex align-items-center gap-2 rounded-3" for="roleDriver">
+                  <i class="fa-solid fa-taxi fs-5"></i>
+                  <div>
+                    <strong class="d-block small">Campus Driver</strong>
+                    <span class="text-muted" style="font-size: 0.7rem;">Verified by Admin</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Passenger Specific: Student or Staff -->
+          <div id="passengerFields" class="p-3 bg-light rounded-3 border mb-3">
+            <label class="form-label fw-bold small text-navy d-block mb-2">
+              <i class="fa-solid fa-id-badge text-primary me-1"></i> Are you a Student or Staff member? *
+            </label>
+            <div class="d-flex gap-4">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="passengerType" id="typeStudent" value="student" checked>
+                <label class="form-check-label fw-semibold" for="typeStudent">
+                  <i class="fa-solid fa-graduation-cap text-primary me-1"></i> Student
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="passengerType" id="typeStaff" value="staff">
+                <label class="form-check-label fw-semibold" for="typeStaff">
+                  <i class="fa-solid fa-briefcase text-primary me-1"></i> Faculty / Staff Member
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Driver Specific: Driving License & Approval Notice -->
+          <div id="driverFields" class="p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25 mb-3" style="display: none;">
+            <label for="licenseNumber" class="form-label fw-bold small text-navy">
+              <i class="fa-solid fa-id-card text-warning me-1"></i> Commercial Driving License Number *
+            </label>
+            <input type="text" class="form-control mb-2" id="licenseNumber" name="licenseNumber" placeholder="e.g. BT-DRV-102938">
+            <small class="text-muted d-block">
+              <i class="fa-solid fa-shield-halved text-warning me-1"></i> Only verified drivers approved by the Admin can provide transportation services. Your account will start in <strong>Pending Verification</strong> status.
+            </small>
+          </div>
+
+          <!-- Password & Confirmation -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <label for="password" class="form-label fw-bold small text-navy">Password (min 6 characters) *</label>
+              <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+            </div>
+            <div class="col-md-6">
+              <label for="confirmPassword" class="form-label fw-bold small text-navy">Confirm Password *</label>
+              <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required placeholder="••••••••">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-warning w-100 py-2 text-dark fw-bold shadow-sm mb-3 rounded-pill">
+            <i class="fa-solid fa-user-plus me-1"></i> Register Account
+          </button>
+        </form>
+
+        <div class="text-center">
+          <small class="text-muted">
+            Already registered on Campus Ride? <a href="/login" class="fw-bold text-decoration-none text-primary">Sign in here</a>
+          </small>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  function toggleRoleFields() {
+    const isDriver = document.getElementById('roleDriver').checked;
+    const passengerFields = document.getElementById('passengerFields');
+    const driverFields = document.getElementById('driverFields');
+    const licenseInput = document.getElementById('licenseNumber');
+
+    if (isDriver) {
+      passengerFields.style.display = 'none';
+      driverFields.style.display = 'block';
+      licenseInput.required = true;
+    } else {
+      passengerFields.style.display = 'block';
+      driverFields.style.display = 'none';
+      licenseInput.required = false;
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

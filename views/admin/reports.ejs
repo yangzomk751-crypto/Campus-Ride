@@ -1,0 +1,134 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h2 class="fw-extrabold text-dark mb-0">Safety Reports & Complaints</h2>
+        <span class="badge bg-danger text-uppercase">Admin</span>
+      </div>
+      <p class="text-muted small mb-0">Review student reported safety incidents, vehicle issues, or lost property</p>
+    </div>
+    <a href="/admin" class="btn btn-outline-secondary btn-sm">
+      <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Status filter buttons -->
+  <div class="btn-group mb-4">
+    <a href="/admin/reports?status=all" class="btn btn-sm <%= currentStatus === 'all' ? 'btn-primary-blue' : 'btn-outline-secondary' %>">All Reports</a>
+    <a href="/admin/reports?status=Pending" class="btn btn-sm <%= currentStatus === 'Pending' ? 'btn-primary-blue' : 'btn-outline-secondary' %>">Pending</a>
+    <a href="/admin/reports?status=Under Review" class="btn btn-sm <%= currentStatus === 'Under Review' ? 'btn-primary-blue' : 'btn-outline-secondary' %>">Under Review</a>
+    <a href="/admin/reports?status=Resolved" class="btn btn-sm <%= currentStatus === 'Resolved' ? 'btn-primary-blue' : 'btn-outline-secondary' %>">Resolved</a>
+    <a href="/admin/reports?status=Dismissed" class="btn btn-sm <%= currentStatus === 'Dismissed' ? 'btn-primary-blue' : 'btn-outline-secondary' %>">Dismissed</a>
+  </div>
+
+  <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+    <% if (reports && reports.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 small">
+          <thead class="table-light">
+            <tr>
+              <th>Report ID</th>
+              <th>Reporter</th>
+              <th>Report Category</th>
+              <th>Target Trip / User</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% reports.forEach(r => { %>
+              <tr>
+                <td><code>#REP-<%= r.report_id %></code></td>
+                <td>
+                  <strong class="text-dark"><%= r.reporter_name %></strong>
+                  <div class="text-muted" style="font-size: 0.75rem;"><%= r.reporter_email %></div>
+                </td>
+                <td>
+                  <span class="badge bg-danger-subtle text-danger"><%= r.report_type %></span>
+                </td>
+                <td>
+                  <% if (r.target_user_name) { %>
+                    <div>User: <strong><%= r.target_user_name %></strong></div>
+                  <% } %>
+                  <% if (r.starting_location) { %>
+                    <div class="text-muted" style="font-size: 0.75rem;">Trip: <%= r.starting_location %> ➔ <%= r.destination %></div>
+                  <% } %>
+                </td>
+                <td>
+                  <div style="max-width: 250px;" class="text-truncate" title="<%= r.description %>">
+                    <%= r.description %>
+                  </div>
+                  <% if (r.admin_notes) { %>
+                    <div class="text-success mt-1" style="font-size: 0.7rem;">Admin note: <%= r.admin_notes %></div>
+                  <% } %>
+                </td>
+                <td>
+                  <span class="badge <%= r.status === 'Resolved' ? 'badge-status-resolved' : (r.status === 'Pending' ? 'badge-status-pending' : 'badge-status-ongoing') %>">
+                    <%= r.status %>
+                  </span>
+                </td>
+                <td class="text-end">
+                  <button type="button" class="btn btn-sm btn-primary-blue py-0 px-2" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#reportActionModal-<%= r.report_id %>">
+                    Update Status
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Modal for Report Action -->
+              <div class="modal fade" id="reportActionModal-<%= r.report_id %>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content border-0 shadow">
+                    <form action="/admin/reports/<%= r.report_id %>" method="POST">
+                      <div class="modal-header bg-light">
+                        <h5 class="modal-title fw-bold">Report Resolution: #REP-<%= r.report_id %></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="p-3 bg-light rounded-3 mb-3 small">
+                          <div><strong>Report Type:</strong> <%= r.report_type %></div>
+                          <div><strong>Reported by:</strong> <%= r.reporter_name %></div>
+                          <div class="mt-2 text-secondary"><strong>Details:</strong> <%= r.description %></div>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label small fw-bold">Update Status *</label>
+                          <select name="status" class="form-select" required>
+                            <option value="Under Review" <%= r.status === 'Under Review' ? 'selected' : '' %>>Under Review</option>
+                            <option value="Resolved" <%= r.status === 'Resolved' ? 'selected' : '' %>>Resolved (Issue addressed)</option>
+                            <option value="Dismissed" <%= r.status === 'Dismissed' ? 'selected' : '' %>>Dismissed (No violation found)</option>
+                            <option value="Pending" <%= r.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                          </select>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label small fw-bold">Resolution Notes</label>
+                          <textarea name="adminNotes" class="form-control" rows="2" placeholder="Describe actions taken (e.g. contacted student, verified vehicle, returned lost item)..."><%= r.admin_notes || '' %></textarea>
+                        </div>
+                      </div>
+                      <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary-blue btn-sm fw-bold">Save Resolution</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state py-4">
+        <p class="text-muted small mb-0">No safety reports found under this filter.</p>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

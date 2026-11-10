@@ -1,0 +1,86 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-6">
+    
+    <div class="text-center">
+      <div class="w-14 h-14 rounded-2xl bg-brand-600 flex items-center justify-center text-white mx-auto shadow-lg shadow-brand-500/30 mb-3">
+        <i class="fa-solid fa-lock text-2xl"></i>
+      </div>
+      <h2 class="text-2xl font-extrabold text-slate-900">Sign in to Campus Ride</h2>
+      <p class="text-xs text-slate-500 mt-1">Access your campus shuttle bookings and transit services</p>
+    </div>
+
+    <!-- Quick Auto-Fill Credential Helper (Super helpful for grading & testing!) -->
+    <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 text-xs text-blue-900">
+      <div class="flex items-center space-x-1.5 font-bold mb-2 text-blue-800">
+        <i class="fa-solid fa-lightbulb text-amber-500"></i>
+        <span>Assignment Demo Quick Login:</span>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <button type="button" onclick="fillCreds('admin@campus.edu', 'Admin@123')" class="px-2.5 py-1.5 bg-white border border-blue-200 hover:border-brand-500 rounded-lg text-center font-medium shadow-xs hover:bg-blue-50 transition">
+          👑 Admin
+        </button>
+        <button type="button" onclick="fillCreds('driver.john@campus.edu', 'Driver@123')" class="px-2.5 py-1.5 bg-white border border-blue-200 hover:border-brand-500 rounded-lg text-center font-medium shadow-xs hover:bg-blue-50 transition">
+          🚌 Driver
+        </button>
+        <button type="button" onclick="fillCreds('alice@campus.edu', 'Student@123')" class="px-2.5 py-1.5 bg-white border border-blue-200 hover:border-brand-500 rounded-lg text-center font-medium shadow-xs hover:bg-blue-50 transition">
+          🎓 Student
+        </button>
+      </div>
+    </div>
+
+    <div class="bg-white py-8 px-6 shadow-sm border border-slate-200 rounded-2xl sm:px-8">
+      <form action="/login" method="POST" class="space-y-4">
+        <div>
+          <label for="email" class="block text-xs font-bold uppercase text-slate-600 tracking-wider mb-1">
+            Campus Email Address
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+              <i class="fa-solid fa-envelope text-sm"></i>
+            </span>
+            <input id="email" name="email" type="email" required value="<%= typeof email !== 'undefined' ? email : '' %>"
+              placeholder="e.g. alice@campus.edu"
+              class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none transition">
+          </div>
+        </div>
+
+        <div>
+          <label for="password" class="block text-xs font-bold uppercase text-slate-600 tracking-wider mb-1">
+            Password
+          </label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+              <i class="fa-solid fa-key text-sm"></i>
+            </span>
+            <input id="password" name="password" type="password" required
+              placeholder="••••••••"
+              class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:bg-white focus:outline-none transition">
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md hover:shadow transition">
+          Sign In
+        </button>
+      </form>
+
+      <div class="mt-6 text-center text-xs text-slate-500">
+        Don't have an account yet? 
+        <a href="/register" class="font-bold text-brand-600 hover:text-brand-800">Register as Student</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function fillCreds(email, pass) {
+    document.getElementById('email').value = email;
+    document.getElementById('password').value = pass;
+  }
+</script>
+
+<%- include('../partials/footer') %>

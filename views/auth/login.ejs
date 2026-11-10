@@ -1,0 +1,111 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+      
+      <div class="card card-campus border-0 shadow-lg p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="navbar-brand-logo mx-auto mb-2" style="width: 52px; height: 52px; font-size: 1.5rem;">
+            <i class="fa-solid fa-van-shuttle"></i>
+          </div>
+          <h3 class="fw-extrabold text-dark">Welcome Back</h3>
+          <p class="text-muted small">Sign in to Sherubtse College Campus Ride</p>
+        </div>
+
+        <form action="/login" method="POST" id="loginForm" novalidate>
+          <div class="mb-3">
+            <label for="email" class="form-label fw-bold small text-dark">College Email Address *</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-envelope"></i></span>
+              <input type="email" class="form-control" id="email" name="email" required placeholder="e.g. sonam@sherubtse.edu.bt" value="<%= typeof email !== 'undefined' ? email : '' %>">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <label for="password" class="form-label fw-bold small text-dark">Password *</label>
+              <a href="#" class="small text-decoration-none text-primary" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+                Forgot Password?
+              </a>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-lock"></i></span>
+              <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+              <button class="btn btn-outline-secondary" type="button" id="togglePassword" title="Toggle password visibility">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-accent-orange w-100 py-2 fw-bold shadow-sm mb-3">
+            Sign In to Campus Ride
+          </button>
+        </form>
+
+        <div class="text-center mb-4">
+          <small class="text-muted">
+            Don't have an account? <a href="/register" class="fw-bold text-decoration-none text-primary">Register here</a>
+          </small>
+        </div>
+
+        <!-- Academic Demo Login Quick Fill Box -->
+        <div class="p-3 bg-light rounded-3 border">
+          <small class="fw-bold text-secondary text-uppercase d-block mb-2" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-wand-magic-sparkles text-warning me-1"></i> Quick Demo Autofill (Academic Testing)
+          </small>
+          <div class="d-grid gap-2">
+            <div class="btn-group btn-group-sm">
+              <button type="button" class="btn btn-outline-primary" onclick="fillDemoAccount('passenger')">
+                <i class="fa-solid fa-user me-1"></i> Passenger
+              </button>
+              <button type="button" class="btn btn-outline-warning text-dark" onclick="fillDemoAccount('driver_car')">
+                <i class="fa-solid fa-car me-1"></i> Car Driver
+              </button>
+              <button type="button" class="btn btn-outline-info text-dark" onclick="fillDemoAccount('driver_bus')">
+                <i class="fa-solid fa-bus me-1"></i> Campus Bus
+              </button>
+              <button type="button" class="btn btn-outline-danger" onclick="fillDemoAccount('admin')">
+                <i class="fa-solid fa-shield me-1"></i> Admin
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- Forgot Password Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold" id="forgotPasswordModalLabel"><i class="fa-solid fa-key text-primary me-2"></i>Account Password Reset</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="small text-secondary">
+          As part of the Sherubtse College Campus Ride academic prototype, passwords can be reset by contacting the college Transport Administrator or using the pre-configured credentials below:
+        </p>
+        <ul class="small text-secondary mb-3">
+          <li><strong>Passenger:</strong> <code>Student@123</code></li>
+          <li><strong>Driver:</strong> <code>Driver@123</code></li>
+          <li><strong>Admin:</strong> <code>Admin@123</code></li>
+        </ul>
+        <div class="alert alert-info py-2 small mb-0">
+          <i class="fa-solid fa-circle-info me-1"></i> For manual credential resets, reach out to <code>admin@sherubtse.edu.bt</code>.
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

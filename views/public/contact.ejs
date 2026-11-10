@@ -1,0 +1,84 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-5 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container py-3">
+    <div class="max-w-700">
+      <span class="badge bg-warning text-dark fw-bold mb-2 text-uppercase">Support & Inquiries</span>
+      <h1 class="display-5 fw-extrabold text-white mb-2">Contact Transport Office</h1>
+      <p class="lead text-light text-opacity-90">
+        Sherubtse College Transport and Estate Management Office, Kanglung.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  <%- include('../partials/alerts') %>
+
+  <div class="row g-5">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <h4 class="fw-bold text-navy mb-4">Send Us a Message</h4>
+        <form action="/contact" method="POST">
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Your Full Name</label>
+            <input type="text" name="name" class="form-control rounded-3" placeholder="e.g. Sonam Dorji" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">College Email Address</label>
+            <input type="email" name="email" class="form-control rounded-3" placeholder="name@sherubtse.edu.bt" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Inquiry Subject</label>
+            <select name="subject" class="form-select rounded-3">
+              <option value="General Inquiry">General Transit Inquiry</option>
+              <option value="Bus Reservation Support">Campus Bus Group Reservation Support</option>
+              <option value="Driver Application">Driver Registration & Verification</option>
+              <option value="Fare Rate Feedback">Fare Chart Feedback / Custom Route Request</option>
+              <option value="Lost and Found">Lost & Found in Vehicle</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-dark">Your Message</label>
+            <textarea name="message" rows="4" class="form-control rounded-3" placeholder="Describe your inquiry..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary fw-bold px-4 py-2 rounded-pill w-100 shadow-sm">
+            <i class="fa-solid fa-paper-plane me-2"></i> Submit Inquiry
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-light mb-4">
+        <h4 class="fw-bold text-navy mb-3"><i class="fa-solid fa-location-dot text-primary me-2"></i> Physical Office</h4>
+        <p class="text-muted small leading-relaxed mb-4">
+          Sherubtse College Campus<br>
+          Transport & Fleet Management Section<br>
+          Administrative Complex, Ground Floor<br>
+          Kanglung, Trashigang, Bhutan
+        </p>
+
+        <h5 class="fw-bold text-navy mb-2"><i class="fa-solid fa-clock text-warning me-2"></i> Office Hours</h5>
+        <ul class="list-unstyled small text-muted mb-4">
+          <li class="py-1"><strong>Monday – Friday:</strong> 8:30 AM – 5:00 PM</li>
+          <li class="py-1"><strong>Saturday:</strong> 9:00 AM – 1:00 PM (Emergency Fleet On Call)</li>
+          <li class="py-1"><strong>Sunday:</strong> On-call emergency transit only</li>
+        </ul>
+
+        <h5 class="fw-bold text-navy mb-2"><i class="fa-solid fa-phone text-success me-2"></i> Direct Helplines</h5>
+        <div class="d-flex flex-column gap-2">
+          <a href="tel:+97517111000" class="btn btn-outline-dark rounded-pill text-start px-3 py-2">
+            <i class="fa-solid fa-phone me-2 text-primary"></i> <strong>Transport Officer:</strong> +975-17111000
+          </a>
+          <a href="mailto:transport@sherubtse.edu.bt" class="btn btn-outline-dark rounded-pill text-start px-3 py-2">
+            <i class="fa-solid fa-envelope me-2 text-primary"></i> <strong>Email:</strong> transport@sherubtse.edu.bt
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

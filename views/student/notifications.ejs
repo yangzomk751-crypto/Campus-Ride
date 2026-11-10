@@ -1,0 +1,52 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="fw-bold mb-1 text-dark">
+            <i class="fa-solid fa-bell text-warning me-2"></i> System Notifications
+          </h2>
+          <p class="text-muted small mb-0">Live status updates on your campus rides and bus reservations</p>
+        </div>
+        <a href="/dashboard" class="btn btn-outline-secondary btn-sm btn-rounded">
+          <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+        </a>
+      </div>
+
+      <div class="card border-0 shadow-sm p-3">
+        <% if (notifications && notifications.length > 0) { %>
+          <div class="list-group list-group-flush">
+            <% notifications.forEach(n => { %>
+              <div class="list-group-item px-3 py-3 border-bottom <%= n.is_read ? 'opacity-75' : 'bg-light rounded' %>">
+                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                  <span class="badge <%= n.is_read ? 'bg-secondary' : 'bg-primary' %>">
+                    <i class="fa-solid fa-circle-info me-1"></i> Notification
+                  </span>
+                  <small class="text-muted"><%= new Date(n.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></small>
+                </div>
+                <p class="mb-1 text-dark fw-medium small"><%= n.message %></p>
+                <% if (n.booking_id) { %>
+                  <a href="/bookings/<%= n.booking_id %>" class="small text-primary text-decoration-none">View Related Booking #<%= n.booking_id %> &rarr;</a>
+                <% } %>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5 text-muted">
+            <i class="fa-regular fa-bell-slash fs-1 text-secondary mb-2"></i>
+            <h6 class="fw-bold text-dark">No Notifications</h6>
+            <p class="small mb-0">You're all caught up! Booking status alerts will appear here.</p>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

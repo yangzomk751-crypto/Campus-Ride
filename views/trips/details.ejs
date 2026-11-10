@@ -1,0 +1,416 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <!-- Breadcrumb Navigation -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="/find-ride" class="text-decoration-none">Find a Ride</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Trip #<%= trip.trip_id %></li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Left Column: Full Trip Details & Passenger Roster -->
+    <div class="col-lg-8">
+      
+      <!-- Main Trip Header Card -->
+      <div class="card card-campus border-0 shadow-sm p-4 mb-4 bg-white">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+          <span class="<%= trip.vehicle_type === 'Campus Bus' ? 'badge-vehicle-bus' : 'badge-vehicle-car' %> fs-6">
+            <i class="fa-solid <%= trip.vehicle_type === 'Campus Bus' ? 'fa-bus' : 'fa-car' %> me-1"></i>
+            <%= trip.vehicle_type %> Service
+          </span>
+
+          <div class="d-flex align-items-center gap-2">
+            <% if (trip.trip_status === 'Scheduled') { %>
+              <span class="badge badge-status-scheduled">
+                <i class="fa-solid fa-calendar-check me-1"></i> Scheduled
+              </span>
+            <% } else if (trip.trip_status === 'Completed') { %>
+              <span class="badge badge-status-resolved">
+                <i class="fa-solid fa-flag-checkered me-1"></i> Completed
+              </span>
+            <% } else { %>
+              <span class="badge badge-status-cancelled">
+                <i class="fa-solid fa-ban me-1"></i> <%= trip.trip_status %>
+              </span>
+            <% } %>
+
+            <!-- Report Button -->
+            <% if (currentUser && !isDriver) { %>
+              <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#reportModal" title="Report this trip or driver">
+                <i class="fa-solid fa-flag"></i> Report
+              </button>
+            <% } %>
+          </div>
+        </div>
+
+        <h3 class="fw-extrabold text-dark mb-3">
+          <%= trip.starting_location %> <i class="fa-solid fa-arrow-right text-primary mx-2"></i> <%= trip.destination %>
+        </h3>
+
+        <!-- Route Nodes & Pickup Landmark -->
+        <div class="p-3 bg-light rounded-3 mb-4">
+          <div class="route-node mb-3">
+            <strong class="d-block text-dark"><%= trip.starting_location %></strong>
+            <span class="text-secondary small">
+              <i class="fa-solid fa-map-pin text-primary me-1"></i> <strong>Pickup Point:</strong> <%= trip.pickup_location %>
+            </span>
+          </div>
+          <div class="route-node destination">
+            <strong class="d-block text-dark"><%= trip.destination %></strong>
+          </div>
+        </div>
+
+        <!-- Schedule & Seat Specs -->
+        <div class="row g-3 text-center mb-4">
+          <div class="col-6 col-md-3">
+            <div class="p-3 rounded-3 border bg-white">
+              <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.65rem;">Travel Date</small>
+              <strong class="text-dark"><%= trip.travel_date.toISOString().split('T')[0] %></strong>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="p-3 rounded-3 border bg-white">
+              <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.65rem;">Departure Time</small>
+              <strong class="text-dark"><%= trip.departure_time.slice(0, 5) %></strong>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="p-3 rounded-3 border bg-white">
+              <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.65rem;">Seats Left</small>
+              <strong class="<%= trip.available_seats > 0 ? 'text-success' : 'text-danger' %>">
+                <%= trip.available_seats %> / <%= trip.total_seats %>
+              </strong>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="p-3 rounded-3 border bg-white">
+              <small class="text-muted d-block text-uppercase fw-semibold" style="font-size: 0.65rem;">Fare / Person</small>
+              <strong class="text-primary">
+                <%= trip.fare_or_contribution > 0 ? `Nu. ${trip.fare_or_contribution}` : 'Free' %>
+              </strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description / Notes -->
+        <% if (trip.trip_description) { %>
+          <div class="mb-3">
+            <h6 class="fw-bold text-dark small text-uppercase mb-2" style="letter-spacing: 0.5px;">Trip Guidelines & Notes</h6>
+            <p class="text-secondary small bg-light p-3 rounded-3 mb-0">
+              <%= trip.trip_description %>
+            </p>
+          </div>
+        <% } %>
+
+        <!-- Driver Action: Cancel Trip -->
+        <% if (isDriver && trip.trip_status === 'Scheduled') { %>
+          <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+            <span class="text-muted small">You are the published driver for this trip.</span>
+            <form action="/trips/<%= trip.trip_id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this trip? Any accepted passengers will be immediately notified.');">
+              <button type="submit" class="btn btn-outline-danger btn-sm fw-bold">
+                <i class="fa-solid fa-ban me-1"></i> Cancel Entire Trip
+              </button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Confirmed Passengers Roster (Visible to Driver or Confirmed Passengers) -->
+      <% if (acceptedPassengers && acceptedPassengers.length > 0) { %>
+        <div class="card card-campus border-0 shadow-sm p-4 mb-4 bg-white">
+          <h5 class="fw-bold text-dark mb-3">
+            <i class="fa-solid fa-users text-primary me-2"></i>Confirmed Passengers Manifest (<%= acceptedPassengers.length %>)
+          </h5>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+              <thead class="table-light">
+                <tr>
+                  <th>Passenger</th>
+                  <th>Student ID</th>
+                  <th>Department</th>
+                  <th>Seats</th>
+                  <th>Pickup Note</th>
+                  <th>Contact</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% acceptedPassengers.forEach(p => { %>
+                  <tr>
+                    <td class="fw-bold"><%= p.full_name %></td>
+                    <td><code><%= p.student_id || 'STU-N/A' %></code></td>
+                    <td><%= p.department || 'N/A' %></td>
+                    <td><span class="badge bg-primary"><%= p.seats_requested %></span></td>
+                    <td class="text-muted"><%= p.pickup_note || 'Standard pickup point' %></td>
+                    <td>
+                      <a href="tel:<%= p.phone %>" class="btn btn-sm btn-outline-secondary py-0">
+                        <i class="fa-solid fa-phone me-1"></i> <%= p.phone %>
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Driver Reviews & Ratings -->
+      <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-star text-warning me-2"></i>Driver Feedback & Reviews
+          </h5>
+          <div class="small">
+            <i class="fa-solid fa-star text-warning"></i>
+            <strong><%= trip.driver_rating %></strong>
+            <span class="text-muted">(<%= trip.driver_review_count %> reviews)</span>
+          </div>
+        </div>
+
+        <% if (driverReviews && driverReviews.length > 0) { %>
+          <div class="d-flex flex-column gap-3 mb-4">
+            <% driverReviews.forEach(rev => { %>
+              <div class="p-3 bg-light rounded-3 border-start border-3 border-warning">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <strong class="small text-dark"><%= rev.reviewer_name %></strong>
+                  <div class="text-warning small">
+                    <% for(let i=0; i<rev.rating; i++) { %>★<% } %>
+                    <small class="text-muted ms-1">(<%= rev.travel_date.toISOString().split('T')[0] %>)</small>
+                  </div>
+                </div>
+                <p class="small text-secondary mb-0"><%= rev.comment %></p>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-muted small mb-3">No reviews submitted for this driver yet.</p>
+        <% } %>
+
+        <!-- Review Submission Form for Confirmed Passengers -->
+        <% if (currentUser && userRequest && userRequest.request_status === 'Accepted' && !hasReviewed && !isDriver) { %>
+          <div class="p-3 rounded-3 border card-soft-blue mt-3">
+            <h6 class="fw-bold text-dark small mb-2"><i class="fa-regular fa-comment-dots text-primary me-1"></i> Leave a Review for <%= trip.driver_name %></h6>
+            <form action="/reviews/create" method="POST">
+              <input type="hidden" name="tripId" value="<%= trip.trip_id %>">
+              <input type="hidden" name="driverId" value="<%= trip.driver_id %>">
+              
+              <div class="row g-2 align-items-center mb-2">
+                <div class="col-auto">
+                  <label class="small fw-semibold text-secondary">Rating:</label>
+                </div>
+                <div class="col-auto">
+                  <select name="rating" class="form-select form-select-sm" required>
+                    <option value="5" selected>5 Stars - Excellent & Punctual</option>
+                    <option value="4">4 Stars - Very Good</option>
+                    <option value="3">3 Stars - Average</option>
+                    <option value="2">2 Stars - Poor</option>
+                    <option value="1">1 Star - Unsatisfactory</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <input type="text" name="comment" class="form-control form-control-sm" placeholder="Share your experience (driving, cleanliness, punctuality)...">
+              </div>
+
+              <button type="submit" class="btn btn-primary-blue btn-sm fw-bold">Submit Review</button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Booking Box & Driver Card -->
+    <div class="col-lg-4">
+      
+      <!-- Seat Booking / Request Card -->
+      <div class="card card-campus border-0 shadow-sm p-4 mb-4 bg-white sticky-top" style="top: 80px; z-index: 10;">
+        <h5 class="fw-bold text-dark mb-3">
+          <i class="fa-solid fa-ticket text-warning me-2"></i>Seat Reservation
+        </h5>
+
+        <% if (!currentUser) { %>
+          <!-- Not logged in -->
+          <div class="alert alert-info py-2 small mb-3">
+            Please sign in with your student account to request seats on this trip.
+          </div>
+          <a href="/login" class="btn btn-primary-blue w-100 fw-bold">Sign In to Book Seat</a>
+        <% } else if (isDriver) { %>
+          <!-- Driver view -->
+          <div class="alert alert-light border small text-muted mb-0">
+            <i class="fa-solid fa-info-circle text-primary me-1"></i> You are the publisher of this ride. Manage seat requests in <a href="/my-trips" class="fw-bold text-primary">My Trips</a>.
+          </div>
+        <% } else if (userRequest) { %>
+          <!-- User already submitted a request -->
+          <div class="p-3 rounded-3 mb-3 text-center <%= userRequest.request_status === 'Accepted' ? 'bg-success-subtle text-success' : (userRequest.request_status === 'Pending' ? 'bg-warning-subtle text-warning-emphasis' : 'bg-danger-subtle text-danger') %>">
+            <small class="text-uppercase fw-bold d-block" style="font-size: 0.7rem;">Your Request Status</small>
+            <h5 class="fw-extrabold mb-1">
+              <% if (userRequest.request_status === 'Accepted') { %>
+                <i class="fa-solid fa-circle-check me-1"></i> Seat Confirmed
+              <% } else if (userRequest.request_status === 'Pending') { %>
+                <i class="fa-solid fa-clock me-1"></i> Pending Approval
+              <% } else if (userRequest.request_status === 'Rejected') { %>
+                <i class="fa-solid fa-circle-xmark me-1"></i> Request Declined
+              <% } else { %>
+                <i class="fa-solid fa-ban me-1"></i> Request Cancelled
+              <% } %>
+            </h5>
+            <small>Requested <strong><%= userRequest.seats_requested %> seat(s)</strong></small>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center">
+            <a href="/my-requests" class="btn btn-outline-primary btn-sm fw-bold">
+              View in My Requests
+            </a>
+
+            <% if (userRequest.request_status === 'Pending' || userRequest.request_status === 'Accepted') { %>
+              <form action="/requests/<%= userRequest.request_id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel your seat request?');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  Cancel Request
+                </button>
+              </form>
+            <% } %>
+          </div>
+        <% } else if (trip.trip_status !== 'Scheduled') { %>
+          <!-- Inactive trip -->
+          <div class="alert alert-secondary small mb-0">
+            This trip is no longer active (<%= trip.trip_status %>).
+          </div>
+        <% } else if (trip.available_seats <= 0) { %>
+          <!-- Fully booked -->
+          <div class="alert alert-danger small mb-0 text-center">
+            <i class="fa-solid fa-circle-exclamation me-1"></i> <strong>Fully Booked!</strong> All <%= trip.total_seats %> seats have been reserved.
+          </div>
+        <% } else { %>
+          <!-- Available to book -->
+          <form action="/requests/create" method="POST">
+            <input type="hidden" name="tripId" value="<%= trip.trip_id %>">
+
+            <div class="mb-3">
+              <label for="seatsRequested" class="form-label small fw-bold text-dark">Number of Seats *</label>
+              <select name="seatsRequested" id="seatsRequested" class="form-select" required>
+                <% for (let i = 1; i <= Math.min(trip.available_seats, 10); i++) { %>
+                  <option value="<%= i %>"><%= i %> <%= i === 1 ? 'seat' : 'seats' %></option>
+                <% } %>
+              </select>
+              <small class="text-muted" style="font-size: 0.75rem;">Max <%= trip.available_seats %> seats currently available.</small>
+            </div>
+
+            <div class="mb-3">
+              <label for="pickupNote" class="form-label small fw-bold text-dark">Pickup Note / Message to Driver</label>
+              <textarea name="pickupNote" id="pickupNote" class="form-control" rows="2" placeholder="e.g. Waiting near hostel gate, carrying a backpack."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-accent-orange w-100 py-2 fw-bold shadow">
+              <i class="fa-solid fa-paper-plane me-1"></i> Submit Seat Request
+            </button>
+          </form>
+        <% } %>
+      </div>
+
+      <!-- Driver & Vehicle Profile Card -->
+      <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+        <h6 class="fw-bold text-dark text-uppercase small mb-3 border-bottom pb-2">
+          <i class="fa-solid fa-id-badge text-primary me-1"></i> Driver & Vehicle Profile
+        </h6>
+
+        <!-- Driver Info -->
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 50px; height: 50px; font-size: 1.25rem;">
+            <%= trip.driver_name.charAt(0) %>
+          </div>
+          <div>
+            <h6 class="fw-bold text-dark mb-0"><%= trip.driver_name %></h6>
+            <small class="text-muted d-block"><%= trip.driver_department || 'Sherubtse College' %></small>
+            <small class="text-muted">ID: <code><%= trip.driver_student_id || 'N/A' %></code></small>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <% if (trip.verification_status === 'Verified') { %>
+            <div class="badge badge-status-verified d-inline-flex align-items-center gap-1">
+              <i class="fa-solid fa-circle-check"></i> Verified Campus Driver
+            </div>
+          <% } else { %>
+            <div class="badge badge-status-pending d-inline-flex align-items-center gap-1">
+              <i class="fa-solid fa-clock"></i> Verification Pending
+            </div>
+          <% } %>
+        </div>
+
+        <% if (trip.driver_bio) { %>
+          <p class="small text-secondary mb-3 fst-italic">
+            "<%= trip.driver_bio %>"
+          </p>
+        <% } %>
+
+        <!-- Vehicle Info Box -->
+        <div class="p-3 bg-light rounded-3">
+          <small class="text-uppercase fw-bold text-secondary d-block mb-2" style="font-size: 0.65rem;">Vehicle Information</small>
+          <div class="small mb-1">
+            <span class="text-muted">Model:</span> <strong><%= trip.vehicle_model || 'Standard Campus Shuttle' %></strong>
+          </div>
+          <div class="small mb-1">
+            <span class="text-muted">Type:</span> <strong><%= trip.vehicle_type %></strong> (<%= trip.vehicle_color || 'Standard' %>)
+          </div>
+          <div class="small mb-1">
+            <span class="text-muted">Registration Plate:</span> <code><%= trip.registration_number || 'N/A' %></code>
+          </div>
+          <div class="small">
+            <span class="text-muted">Max Capacity:</span> <%= trip.vehicle_capacity || trip.total_seats %> passengers
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <form action="/reports/create" method="POST">
+        <input type="hidden" name="reportedTripId" value="<%= trip.trip_id %>">
+        <input type="hidden" name="reportedUserId" value="<%= trip.driver_user_id %>">
+
+        <div class="modal-header bg-light">
+          <h5 class="modal-title fw-bold text-danger" id="reportModalLabel">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>Report Trip or Driver
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="reportType" class="form-label small fw-bold">Reason for Report *</label>
+            <select name="reportType" id="reportType" class="form-select" required>
+              <option value="Suspicious / Inappropriate Content">Suspicious / Inappropriate Content</option>
+              <option value="Dangerous Driving / Safety Concern">Dangerous Driving / Safety Concern</option>
+              <option value="Unreasonable Fare / Overcharging">Unreasonable Fare / Overcharging</option>
+              <option value="No Show / Unreliable Departure">No Show / Unreliable Departure</option>
+              <option value="Lost Property">Lost Property</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label small fw-bold">Provide Details *</label>
+            <textarea name="description" id="description" class="form-control" rows="3" required placeholder="Describe what happened so administration can investigate..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger btn-sm fw-bold">Submit Report</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

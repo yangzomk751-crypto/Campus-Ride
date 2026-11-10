@@ -1,0 +1,147 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">Financial Oversight</span>
+        <h2 class="fw-extrabold text-white mb-0">Payment Management</h2>
+        <small class="text-light text-opacity-75">
+          Monitor passenger cash payment receipts, reconcile driver cash collections, and administer waivers.
+        </small>
+      </div>
+
+      <div>
+        <a href="/admin" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-arrow-left me-1"></i> Admin Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <!-- Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-top border-4 border-success">
+        <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Paid Cash Fares</span>
+        <div class="fs-4 fw-extrabold text-success">Nu. <%= summary.paid_amount.toLocaleString() %></div>
+        <small class="text-muted"><%= summary.paid_count %> Transactions Succeeded</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-top border-4 border-warning">
+        <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Pending Cash</span>
+        <div class="fs-4 fw-extrabold text-warning">Nu. <%= summary.pending_amount.toLocaleString() %></div>
+        <small class="text-muted"><%= summary.pending_count %> Rides Awaiting Collection</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-top border-4 border-info">
+        <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Waived Institutional Trips</span>
+        <div class="fs-4 fw-extrabold text-info">Nu. <%= summary.waived_amount.toLocaleString() %></div>
+        <small class="text-muted"><%= summary.waived_count %> College Sponsored Trips</small>
+      </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-top border-4 border-primary">
+        <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Total Transaction Volume</span>
+        <div class="fs-4 fw-extrabold text-navy">Nu. <%= summary.total_amount.toLocaleString() %></div>
+        <small class="text-muted"><%= summary.total_payments %> Total Invoices</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Filters -->
+  <div class="d-flex flex-wrap gap-2 mb-4 pb-2 border-bottom">
+    <a href="/admin/payments?status=all" class="btn btn-sm <%= currentStatus === 'all' ? 'btn-primary' : 'btn-outline-secondary' %> rounded-pill px-3">
+      All Payments (<%= payments.length %>)
+    </a>
+    <a href="/admin/payments?status=Pending" class="btn btn-sm <%= currentStatus === 'Pending' ? 'btn-warning text-dark fw-bold' : 'btn-outline-warning text-dark' %> rounded-pill px-3">
+      <i class="fa-solid fa-hourglass-start me-1"></i> Pending Cash
+    </a>
+    <a href="/admin/payments?status=Paid" class="btn btn-sm <%= currentStatus === 'Paid' ? 'btn-success' : 'btn-outline-success' %> rounded-pill px-3">
+      <i class="fa-solid fa-circle-check me-1"></i> Paid
+    </a>
+    <a href="/admin/payments?status=Waived" class="btn btn-sm <%= currentStatus === 'Waived' ? 'btn-info text-white' : 'btn-outline-info' %> rounded-pill px-3">
+      <i class="fa-solid fa-award me-1"></i> Waived
+    </a>
+  </div>
+
+  <!-- Payments Table -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold text-navy mb-0"><i class="fa-solid fa-wallet text-primary me-2"></i> Payment Records (<%= payments.length %>)</h5>
+    </div>
+
+    <% if (payments && payments.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Booking Ref</th>
+              <th>Passenger</th>
+              <th>Route & Service</th>
+              <th>Date</th>
+              <th>Amount (Nu.)</th>
+              <th>Driver</th>
+              <th>Status</th>
+              <th class="pe-4 text-end">Update Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payments.forEach(function(p) { %>
+              <tr>
+                <td class="ps-4 fw-bold text-navy">#<%= p.booking_id %></td>
+                <td>
+                  <strong><%= p.passenger_name %></strong>
+                  <small class="text-muted d-block"><%= p.passenger_phone %></small>
+                </td>
+                <td>
+                  <span class="badge bg-secondary me-1"><%= p.service_type %></span>
+                  <strong><%= p.destination %></strong>
+                </td>
+                <td>
+                  <small class="text-muted"><%= p.travel_date ? new Date(p.travel_date).toLocaleDateString() : 'N/A' %></small>
+                </td>
+                <td>
+                  <span class="fs-6 fw-bold text-navy">Nu. <%= parseFloat(p.amount || 0).toLocaleString() %></span>
+                </td>
+                <td><%= p.driver_name || 'Unassigned' %></td>
+                <td>
+                  <% if (p.payment_status === 'Paid') { %>
+                    <span class="badge bg-success text-white"><i class="fa-solid fa-check me-1"></i> Paid</span>
+                  <% } else if (p.payment_status === 'Waived') { %>
+                    <span class="badge bg-info text-white"><i class="fa-solid fa-award me-1"></i> Waived</span>
+                  <% } else { %>
+                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-start me-1"></i> Pending</span>
+                  <% } %>
+                </td>
+                <td class="pe-4 text-end">
+                  <form action="/admin/payments/<%= p.payment_id %>/update" method="POST" class="d-inline d-flex justify-content-end gap-1">
+                    <select name="status" class="form-select form-select-sm" style="width: auto;">
+                      <option value="Paid" <%= p.payment_status === 'Paid' ? 'selected' : '' %>>Mark Paid</option>
+                      <option value="Waived" <%= p.payment_status === 'Waived' ? 'selected' : '' %>>Mark Waived</option>
+                      <option value="Pending" <%= p.payment_status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                    </select>
+                    <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill px-2">Update</button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5 text-muted">
+        <p class="mb-0">No payment records found.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

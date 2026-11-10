@@ -1,0 +1,184 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+      <h2 class="fw-extrabold text-dark mb-1">My Published Trips</h2>
+      <p class="text-muted small mb-0">Manage your published campus carpools, bus trips, and passenger requests</p>
+    </div>
+    <a href="/offer-ride" class="btn btn-accent-orange fw-bold">
+      <i class="fa-solid fa-plus-circle me-1"></i> Offer New Ride
+    </a>
+  </div>
+
+  <% if (trips && trips.length > 0) { %>
+    <div class="d-flex flex-column gap-4">
+      <% trips.forEach(trip => { %>
+        <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+          
+          <!-- Trip Header -->
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-2 pb-3 border-bottom mb-3">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="<%= trip.vehicle_type === 'Campus Bus' ? 'badge-vehicle-bus' : 'badge-vehicle-car' %>" style="font-size: 0.75rem;">
+                  <i class="fa-solid <%= trip.vehicle_type === 'Campus Bus' ? 'fa-bus' : 'fa-car' %> me-1"></i>
+                  <%= trip.vehicle_type %>
+                </span>
+
+                <% if (trip.trip_status === 'Scheduled') { %>
+                  <span class="badge badge-status-scheduled">Active Scheduled</span>
+                <% } else if (trip.trip_status === 'Completed') { %>
+                  <span class="badge badge-status-resolved">Completed</span>
+                <% } else { %>
+                  <span class="badge badge-status-cancelled"><%= trip.trip_status %></span>
+                <% } %>
+
+                <span class="badge bg-light text-dark border">
+                  Vehicle: <strong><%= trip.vehicle_model || 'Standard' %> (<%= trip.registration_number || 'N/A' %>)</strong>
+                </span>
+              </div>
+
+              <h4 class="fw-extrabold text-dark mb-1">
+                <%= trip.starting_location %> <i class="fa-solid fa-arrow-right text-primary mx-2"></i> <%= trip.destination %>
+              </h4>
+              <small class="text-secondary">
+                <i class="fa-solid fa-map-pin text-primary me-1"></i> Pickup: <%= trip.pickup_location %>
+              </small>
+            </div>
+
+            <!-- Schedule & Remaining Seats -->
+            <div class="text-md-end">
+              <div class="fw-bold text-dark fs-6">
+                <i class="fa-regular fa-calendar me-1 text-primary"></i> <%= trip.travel_date.toISOString().split('T')[0] %> at <%= trip.departure_time.slice(0, 5) %>
+              </div>
+              <div class="mt-1">
+                <span class="badge bg-success-subtle text-success fs-6 fw-bold px-3 py-1">
+                  <i class="fa-solid fa-chair me-1"></i> <%= trip.available_seats %> / <%= trip.total_seats %> seats remaining
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section A: Pending Passenger Requests -->
+          <div class="mb-4">
+            <h6 class="fw-bold text-dark small text-uppercase mb-3 d-flex align-items-center gap-2">
+              <span class="badge bg-warning text-dark"><%= trip.pending.length %></span>
+              <span>Pending Seat Requests (Action Required)</span>
+            </h6>
+
+            <% if (trip.pending.length > 0) { %>
+              <div class="table-responsive border rounded-3 bg-light">
+                <table class="table table-hover align-middle mb-0 small">
+                  <thead class="table-secondary">
+                    <tr>
+                      <th>Passenger</th>
+                      <th>Student ID</th>
+                      <th>Phone</th>
+                      <th>Seats Requested</th>
+                      <th>Pickup Note</th>
+                      <th class="text-end">Manage Request</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% trip.pending.forEach(p => { %>
+                      <tr>
+                        <td class="fw-bold text-dark"><%= p.passenger_name %></td>
+                        <td><code><%= p.passenger_student_id || 'N/A' %></code></td>
+                        <td><%= p.passenger_phone %></td>
+                        <td><span class="badge bg-primary fs-6"><%= p.seats_requested %></span></td>
+                        <td class="text-muted"><%= p.pickup_note || 'None' %></td>
+                        <td class="text-end">
+                          <div class="d-inline-flex gap-2">
+                            <!-- Accept Form -->
+                            <form action="/requests/<%= p.request_id %>/accept" method="POST">
+                              <button type="submit" class="btn btn-success btn-sm fw-bold">
+                                <i class="fa-solid fa-check me-1"></i> Accept
+                              </button>
+                            </form>
+                            <!-- Reject Form -->
+                            <form action="/requests/<%= p.request_id %>/reject" method="POST" onsubmit="return confirm('Reject this seat request?');">
+                              <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="fa-solid fa-xmark me-1"></i> Reject
+                              </button>
+                            </form>
+                          </div>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            <% } else { %>
+              <div class="p-3 bg-light rounded-3 text-center small text-muted">
+                No pending requests awaiting your response.
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Section B: Confirmed / Accepted Passengers -->
+          <div class="mb-3">
+            <h6 class="fw-bold text-dark small text-uppercase mb-2 d-flex align-items-center gap-2">
+              <span class="badge bg-success"><%= trip.accepted.length %></span>
+              <span>Confirmed Passengers Manifest</span>
+            </h6>
+
+            <% if (trip.accepted.length > 0) { %>
+              <div class="row g-2">
+                <% trip.accepted.forEach(p => { %>
+                  <div class="col-md-6 col-lg-4">
+                    <div class="p-2 border rounded-3 bg-white d-flex align-items-center justify-content-between small">
+                      <div>
+                        <strong class="d-block text-dark"><%= p.passenger_name %></strong>
+                        <span class="text-muted" style="font-size: 0.75rem;">
+                          <i class="fa-solid fa-phone me-1"></i><%= p.passenger_phone %> &bull; <%= p.seats_requested %> seat(s)
+                        </span>
+                      </div>
+                      <a href="tel:<%= p.passenger_phone %>" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Call passenger">
+                        <i class="fa-solid fa-phone"></i>
+                      </a>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <div class="p-2 bg-light rounded-3 small text-muted">
+                No confirmed passengers yet.
+              </div>
+            <% } %>
+          </div>
+
+          <!-- Trip Footer Actions -->
+          <div class="pt-3 border-top d-flex justify-content-between align-items-center">
+            <a href="/trips/<%= trip.trip_id %>" class="btn btn-outline-primary btn-sm fw-bold">
+              <i class="fa-solid fa-eye me-1"></i> Public Trip Details Page
+            </a>
+
+            <% if (trip.trip_status === 'Scheduled') { %>
+              <form action="/trips/<%= trip.trip_id %>/cancel" method="POST" onsubmit="return confirm('Cancel this trip? All passengers will be notified.');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  <i class="fa-solid fa-ban me-1"></i> Cancel Trip
+                </button>
+              </form>
+            <% } %>
+          </div>
+
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="empty-state py-5 bg-white">
+      <i class="fa-solid fa-car empty-state-icon"></i>
+      <h4 class="fw-bold text-dark">No Published Trips Yet</h4>
+      <p class="text-muted small mb-4">
+        You haven't offered any campus rides. Share seats in your private car or publish official campus shuttle departures.
+      </p>
+      <a href="/offer-ride" class="btn btn-accent-orange fw-bold">
+        <i class="fa-solid fa-plus-circle me-1"></i> Publish Your First Trip
+      </a>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

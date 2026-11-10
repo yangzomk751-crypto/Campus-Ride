@@ -1,0 +1,243 @@
+<%- include('../partials/header') %>
+  <%- include('../partials/navbar') %>
+
+    <div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+      <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div>
+            <h2 class="fw-extrabold text-white mb-0">Book a Bus for Group Trips</h2>
+            <small class="text-light text-opacity-75">
+              Group Trips, Friends Outings, Weekend Excursions & Student Travel • Registered & Verified Bus Operators
+            </small>
+          </div>
+
+          <div>
+            <a href="/my-bookings" class="btn btn-outline-light btn-sm rounded-pill px-3">
+              <i class="fa-solid fa-list-check me-1"></i> My Bookings
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container py-4">
+      <%- include('../partials/alerts') %>
+
+        <!-- Booking Workflow Stepper -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+          <h6 class="fw-bold text-navy mb-3"><i class="fa-solid fa-diagram-project text-info me-2"></i> Official Bus
+            Reservation Workflow</h6>
+          <div class="row g-2 text-center small">
+            <div class="col-md-3">
+              <div class="p-2 rounded-3 bg-light border">
+                <strong class="d-block text-primary">1. Submit Request</strong>
+                <span class="text-muted" style="font-size: 0.75rem;">Passenger specifies date, pax & purpose</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="p-2 rounded-3 bg-light border">
+                <strong class="d-block text-warning">2. Admin Quote</strong>
+                <span class="text-muted" style="font-size: 0.75rem;">Admin checks bus & provides fare quote</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="p-2 rounded-3 bg-light border">
+                <strong class="d-block text-info">3. Passenger Accepts</strong>
+                <span class="text-muted" style="font-size: 0.75rem;">Passenger accepts or declines quotation</span>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="p-2 rounded-3 bg-light border">
+                <strong class="d-block text-success">4. Fleet Assignment</strong>
+                <span class="text-muted" style="font-size: 0.75rem;">Admin assigns bus & driver → Confirmed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <!-- Bus Request Form -->
+          <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+              <h4 class="fw-bold text-navy mb-4"><i class="fa-solid fa-bus text-info me-2"></i> Bus Reservation Form
+              </h4>
+
+              <form action="/book-bus" method="POST" id="busBookingForm">
+                <!-- Pickup Location -->
+                <div class="mb-3">
+                  <label for="pickupLocation" class="form-label fw-bold small text-navy">Pickup Location *</label>
+                  <input type="text" class="form-control" id="pickupLocation" name="pickupLocation" required
+                    placeholder="e.g. Sherubtse Upper Gate Bus Shelter / Hostels"
+                    value="Sherubtse Upper Gate Bus Parking">
+                </div>
+
+                <!-- Destination Selection -->
+                <div class="mb-3">
+                  <label for="destinationSelect" class="form-label fw-bold small text-navy">Destination *</label>
+                  <select class="form-select rounded-3" id="destinationSelect" name="destinationSelect" required
+                    onchange="handleBusDestChange()">
+                    <option value="" disabled selected>-- Select destination or custom route --</option>
+                    <optgroup label="Dzongkhags of Bhutan">
+                      <% rates.forEach(function(r) { %>
+                        <option value="<%= r.destination %>" data-bus-fare="<%= r.bus_fare %>">
+                          <%= r.destination %> (Nu. <%= parseFloat(r.bus_fare).toLocaleString() %> / passenger)
+                        </option>
+                        <% }); %>
+                    </optgroup>
+                    <optgroup label="Custom / Other Destination">
+                      <option value="OTHER">-- Unlisted Destination (Specify Below) --</option>
+                    </optgroup>
+                  </select>
+                </div>
+
+                <!-- Custom Destination Input -->
+                <div class="mb-3 p-3 bg-light rounded-3 border" id="customBusDestDiv" style="display: none;">
+                  <label for="customDestination" class="form-label fw-bold small text-navy">Specify Unlisted Destination
+                    *</label>
+                  <input type="text" class="form-control" id="customDestination" name="customDestination"
+                    placeholder="e.g. Bartsham Field Research Station, Drametse...">
+                </div>
+
+                <!-- Travel Date & Preferred Departure Time -->
+                <div class="row g-3 mb-3">
+                  <div class="col-md-6">
+                    <label for="travelDate" class="form-label fw-bold small text-navy">Travel Date *</label>
+                    <input type="date" class="form-control" id="travelDate" name="travelDate" required
+                      min="<%= new Date().toISOString().split('T')[0] %>">
+                  </div>
+                  <div class="col-md-6">
+                    <label for="departureTime" class="form-label fw-bold small text-navy">Preferred Departure Time
+                      *</label>
+                    <input type="time" class="form-control" id="departureTime" name="departureTime" required
+                      value="08:00">
+                  </div>
+                </div>
+
+                <!-- Passenger Count -->
+                <div class="mb-3">
+                  <label for="passengerCount" class="form-label fw-bold small text-navy">Number of Passengers (5 to 60)
+                    *</label>
+                  <input type="number" class="form-control" id="passengerCount" name="passengerCount" required min="5"
+                    max="60" value="25" onchange="calculateBusEstimate()">
+                  <small class="text-muted">Buses accommodate groups of friends, outings, picnics, and tours between 5
+                    and 60 passengers.</small>
+                </div>
+
+                <!-- Purpose of Travel -->
+                <div class="mb-3">
+                  <label for="tripPurpose" class="form-label fw-bold small text-navy">Trip Details / Purpose *</label>
+                  <textarea class="form-control" id="tripPurpose" name="tripPurpose" rows="3" required
+                    placeholder="e.g. Friends weekend trip to Trashigang, group picnic, excursion, vacation, cultural tour, or student outing..."></textarea>
+                </div>
+
+                <!-- Additional Remarks -->
+                <div class="mb-4">
+                  <label for="remarks" class="form-label fw-bold small text-navy">Additional Remarks (Optional)</label>
+                  <input type="text" class="form-control" id="remarks" name="remarks"
+                    placeholder="e.g. Need luggage space, round-trip waiting, specific pickup point">
+                </div>
+
+                <button type="submit" class="btn btn-info text-white w-100 py-3 fw-bold rounded-pill shadow-sm">
+                  <i class="fa-solid fa-paper-plane me-2"></i> Submit Bus Request for Admin Review
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Bus Rules & Summary Sidebar -->
+          <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 80px;">
+              <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-calculator text-info me-2"></i> Fare Estimation
+                Preview</h5>
+
+              <div class="p-3 bg-light rounded-3 border mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted small">Selected Destination:</span>
+                  <strong class="text-navy" id="previewBusDest">None Selected</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted small">Per Passenger Rate:</span>
+                  <strong class="text-navy" id="previewBusPerPax">Nu. 0.00 / pax</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="text-muted small">Passengers:</span>
+                  <strong class="text-navy" id="previewBusCount">25 Pax</strong>
+                </div>
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="text-muted small">Estimated Group Total:</span>
+                  <span class="fs-5 fw-bold text-navy" id="previewBusTotal">Nu. 0.00</span>
+                </div>
+              </div>
+
+              <div class="alert alert-warning py-2 small mb-3 border-0">
+                <i class="fa-solid fa-shield-halved me-1"></i> <strong>Important Protocol:</strong>
+                Drivers cannot independently accept bus requests. All bus bookings are strictly reviewed and assigned by
+                the Transport Administrator.
+              </div>
+
+              <div class="small text-muted">
+                <strong class="d-block text-navy mb-1"><i class="fa-solid fa-check-double text-success me-1"></i> What
+                  happens next:</strong>
+                1. Transport Office verifies bus capacity and driver availability.<br>
+                2. Admin enters the official fare quotation.<br>
+                3. You receive a notification to Accept or Decline the quotation.<br>
+                4. Upon acceptance, the trip is assigned and confirmed.
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <script>
+      function handleBusDestChange() {
+        const select = document.getElementById('destinationSelect');
+        const customDiv = document.getElementById('customBusDestDiv');
+        const customInput = document.getElementById('customDestination');
+
+        if (select.value === 'OTHER') {
+          customDiv.style.display = 'block';
+          customInput.required = true;
+        } else {
+          customDiv.style.display = 'none';
+          customInput.required = false;
+        }
+
+        calculateBusEstimate();
+      }
+
+      function calculateBusEstimate() {
+        const select = document.getElementById('destinationSelect');
+        const paxCount = parseInt(document.getElementById('passengerCount').value, 10) || 25;
+        const destPreview = document.getElementById('previewBusDest');
+        const perPaxPreview = document.getElementById('previewBusPerPax');
+        const countPreview = document.getElementById('previewBusCount');
+        const totalPreview = document.getElementById('previewBusTotal');
+
+        countPreview.textContent = paxCount + ' Pax';
+
+        if (select.value === 'OTHER') {
+          destPreview.textContent = 'Custom Destination';
+          perPaxPreview.textContent = 'Quote by Admin';
+          totalPreview.textContent = 'Admin Quotation Needed';
+          return;
+        }
+
+        const selectedOption = select.options[select.selectedIndex];
+        if (!selectedOption || !selectedOption.dataset.busFare) {
+          destPreview.textContent = 'None Selected';
+          perPaxPreview.textContent = 'Nu. 0.00 / pax';
+          totalPreview.textContent = 'Nu. 0.00';
+          return;
+        }
+
+        const perPax = parseFloat(selectedOption.dataset.busFare);
+        const total = perPax * paxCount;
+
+        destPreview.textContent = select.value;
+        perPaxPreview.textContent = 'Nu. ' + perPax.toLocaleString() + ' / pax';
+        totalPreview.textContent = 'Nu. ' + total.toLocaleString();
+      }
+    </script>
+
+    <%- include('../partials/footer') %>

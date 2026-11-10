@@ -1,0 +1,85 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+  
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 mb-2">
+        <i class="fa-solid fa-book-bookmark"></i>
+        <span>Ticketing Ledger</span>
+      </div>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight">University Booking Records</h1>
+      <p class="text-sm text-slate-500">Master ledger of student seat reservations, passes, and ride statuses</p>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+    <% if (bookings && bookings.length > 0) { %>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-600">
+          <thead class="bg-slate-100 text-slate-500 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-200">
+            <tr>
+              <th class="px-5 py-3">Code</th>
+              <th class="px-5 py-3">Student Passenger</th>
+              <th class="px-5 py-3">Route</th>
+              <th class="px-5 py-3">Departure Date/Time</th>
+              <th class="px-5 py-3 text-center">Seats</th>
+              <th class="px-5 py-3">Total Fare</th>
+              <th class="px-5 py-3">Status</th>
+              <th class="px-5 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 font-medium">
+            <% bookings.forEach(b => { %>
+              <tr class="hover:bg-slate-50 transition">
+                <td class="px-5 py-3 font-mono font-bold text-slate-900"><%= b.booking_code %></td>
+                <td class="px-5 py-3">
+                  <span class="font-bold text-slate-800"><%= b.passenger_name %></span>
+                  <span class="text-[10px] text-slate-400 block"><%= b.student_staff_id || b.passenger_email %></span>
+                </td>
+                <td class="px-5 py-3">
+                  <span class="font-semibold text-slate-800"><%= b.route_name %></span>
+                  <span class="text-[10px] text-slate-400 block"><%= b.origin_stop_name %> ➔ <%= b.destination_stop_name %></span>
+                </td>
+                <td class="px-5 py-3">
+                  <span class="font-bold text-brand-700">
+                    <%= new Date(b.departure_time).toLocaleDateString([], { month: 'short', day: 'numeric' }) %>
+                    <%= new Date(b.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-center font-bold text-slate-900"><%= b.seats_booked %></td>
+                <td class="px-5 py-3 font-bold text-slate-800">
+                  <%= parseFloat(b.total_fare) === 0 ? 'FREE' : '$' + parseFloat(b.total_fare).toFixed(2) %>
+                </td>
+                <td class="px-5 py-3">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <%= b.status === 'CONFIRMED' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800' %>">
+                    <%= b.status %>
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-right space-x-1">
+                  <a href="/bookings/<%= b.id %>/ticket" class="text-brand-600 hover:text-brand-800 font-bold p-1" title="View Ticket">
+                    <i class="fa-solid fa-qrcode"></i>
+                  </a>
+                  <% if (b.status === 'CONFIRMED') { %>
+                    <form action="/admin/bookings/<%= b.id %>/cancel" method="POST" onsubmit="return confirm('Cancel this student booking and refund seats?');" class="inline">
+                      <button type="submit" class="text-rose-600 hover:text-rose-800 font-bold p-1" title="Admin Cancel">
+                        <i class="fa-solid fa-ban"></i>
+                      </button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="p-8 text-center text-slate-400 text-xs">No bookings recorded yet.</div>
+    <% } %>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

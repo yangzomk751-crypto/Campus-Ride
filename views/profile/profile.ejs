@@ -1,0 +1,258 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="row g-4">
+    
+    <!-- Left Column: Profile Card & Verification Status -->
+    <div class="col-lg-4">
+      <div class="card card-campus border-0 shadow-sm p-4 bg-white text-center mb-4">
+        <div class="rounded-circle bg-light text-primary mx-auto d-flex align-items-center justify-content-center fw-bold mb-3 shadow-sm" style="width: 80px; height: 80px; font-size: 2rem; border: 3px solid var(--primary-blue);">
+          <%= profile.full_name.charAt(0) %>
+        </div>
+
+        <h4 class="fw-bold text-dark mb-1"><%= profile.full_name %></h4>
+        <p class="text-muted small mb-2"><%= profile.email %></p>
+
+        <div class="d-flex justify-content-center gap-2 mb-3">
+          <span class="badge <%= profile.role === 'driver' ? 'bg-warning text-dark' : (profile.role === 'admin' ? 'bg-danger' : 'bg-primary') %> text-uppercase">
+            <%= profile.role %>
+          </span>
+          <span class="badge bg-light text-secondary border">
+            ID: <%= profile.student_id || 'STU-N/A' %>
+          </span>
+        </div>
+
+        <!-- Verification Badge (For Drivers) -->
+        <% if (profile.role === 'driver') { %>
+          <div class="p-3 rounded-3 mb-3 text-start <%= verification && verification.verification_status === 'Verified' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-dark' %>">
+            <small class="fw-bold text-uppercase d-block mb-1" style="font-size: 0.65rem;">Campus Driver Verification</small>
+            <div class="d-flex align-items-center gap-2">
+              <% if (verification && verification.verification_status === 'Verified') { %>
+                <i class="fa-solid fa-circle-check fs-5 text-success"></i>
+                <div>
+                  <strong class="d-block small">Verified Driver</strong>
+                  <small style="font-size: 0.75rem;">Authorized to offer public trips</small>
+                </div>
+              <% } else if (verification && verification.verification_status === 'Rejected') { %>
+                <i class="fa-solid fa-circle-xmark fs-5 text-danger"></i>
+                <div>
+                  <strong class="d-block small text-danger">Verification Rejected</strong>
+                  <small class="text-danger" style="font-size: 0.75rem;"><%= verification.admin_notes || 'Please resubmit valid documents.' %></small>
+                </div>
+              <% } else { %>
+                <i class="fa-solid fa-clock-rotate-left fs-5 text-warning"></i>
+                <div>
+                  <strong class="d-block small">Verification Pending</strong>
+                  <small style="font-size: 0.75rem;">Awaiting campus administrator review</small>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+
+        <div class="border-top pt-3 text-start small">
+          <div class="mb-2">
+            <span class="text-muted"><i class="fa-solid fa-building-columns me-2 text-primary"></i>College:</span>
+            <strong><%= profile.college_name || 'Sherubtse College' %></strong>
+          </div>
+          <div class="mb-2">
+            <span class="text-muted"><i class="fa-solid fa-book-bookmark me-2 text-primary"></i>Department:</span>
+            <strong><%= profile.department || 'Not specified' %></strong>
+          </div>
+          <div class="mb-2">
+            <span class="text-muted"><i class="fa-solid fa-phone me-2 text-primary"></i>Phone:</span>
+            <strong><%= profile.phone %></strong>
+          </div>
+          <div>
+            <span class="text-muted"><i class="fa-solid fa-kit-medical me-2 text-danger"></i>Emergency:</span>
+            <strong><%= profile.emergency_contact || 'None registered' %></strong>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right Column: Edit Profile & Driver Vehicle/Verification Section -->
+    <div class="col-lg-8">
+      
+      <!-- Edit Profile Card -->
+      <div class="card card-campus border-0 shadow-sm p-4 mb-4 bg-white">
+        <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+          <i class="fa-solid fa-user-pen text-primary me-2"></i>Update Personal Profile
+        </h5>
+
+        <form action="/profile" method="POST">
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="fullName" class="form-label fw-bold small text-dark">Full Name *</label>
+              <input type="text" class="form-control" id="fullName" name="fullName" required value="<%= profile.full_name %>">
+            </div>
+            <div class="col-md-6">
+              <label for="phone" class="form-label fw-bold small text-dark">Contact Phone *</label>
+              <input type="text" class="form-control" id="phone" name="phone" required value="<%= profile.phone %>">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="department" class="form-label fw-bold small text-dark">Department</label>
+              <input type="text" class="form-control" id="department" name="department" value="<%= profile.department || '' %>" placeholder="e.g. Computer Science">
+            </div>
+            <div class="col-md-6">
+              <label for="yearOfStudy" class="form-label fw-bold small text-dark">Year of Study</label>
+              <input type="text" class="form-control" id="yearOfStudy" name="yearOfStudy" value="<%= profile.year_of_study || '' %>" placeholder="e.g. 3rd Year">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="emergencyContact" class="form-label fw-bold small text-dark">Emergency Contact Number</label>
+            <input type="text" class="form-control" id="emergencyContact" name="emergencyContact" value="<%= profile.emergency_contact || '' %>" placeholder="+975-17XXXXXX (Parent or Guardian)">
+          </div>
+
+          <div class="mb-3">
+            <label for="bio" class="form-label fw-bold small text-dark">Short Bio / Commute Habits</label>
+            <textarea class="form-control" id="bio" name="bio" rows="2" placeholder="e.g. Day scholar driving daily from Trashigang to Kanglung..."><%= profile.bio || '' %></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary-blue btn-sm fw-bold px-4">
+            Save Profile Changes
+          </button>
+        </form>
+      </div>
+
+      <!-- Driver Specific: Vehicle Fleet & Verification Request -->
+      <% if (profile.role === 'driver' || profile.role === 'admin') { %>
+        
+        <!-- Vehicles List & Add Vehicle Form -->
+        <div class="card card-campus border-0 shadow-sm p-4 mb-4 bg-white">
+          <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+            <h5 class="fw-bold text-dark mb-0">
+              <i class="fa-solid fa-car text-primary me-2"></i>My Registered Vehicles
+            </h5>
+            <button class="btn btn-sm btn-outline-primary fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#addVehicleForm">
+              <i class="fa-solid fa-plus me-1"></i> Register New Vehicle
+            </button>
+          </div>
+
+          <!-- Existing Vehicles -->
+          <% if (vehicles && vehicles.length > 0) { %>
+            <div class="row g-3 mb-3">
+              <% vehicles.forEach(v => { %>
+                <div class="col-md-6">
+                  <div class="p-3 border rounded-3 bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <strong class="text-dark"><%= v.vehicle_model %></strong>
+                      <span class="<%= v.vehicle_type === 'Campus Bus' ? 'badge-vehicle-bus' : 'badge-vehicle-car' %>" style="font-size: 0.7rem;">
+                        <%= v.vehicle_type %>
+                      </span>
+                    </div>
+                    <div class="small text-muted mb-1">
+                      Plate: <code><%= v.registration_number %></code> &bull; Color: <%= v.color %>
+                    </div>
+                    <div class="small text-secondary">
+                      Max Passenger Capacity: <strong><%= v.capacity %> seats</strong>
+                    </div>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <p class="text-muted small mb-3">No vehicles registered yet. Please add your car or campus bus below.</p>
+          <% } %>
+
+          <!-- Add Vehicle Collapse Form -->
+          <div class="collapse <%= !vehicles || vehicles.length === 0 ? 'show' : '' %>" id="addVehicleForm">
+            <div class="p-3 border rounded-3 card-soft-blue">
+              <h6 class="fw-bold text-dark small mb-3">Register Vehicle Information</h6>
+              <form action="/profile/add-vehicle" method="POST">
+                <div class="row g-3 mb-2">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold">Vehicle Model *</label>
+                    <input type="text" name="vehicleModel" class="form-control form-control-sm" required placeholder="e.g. Maruti Suzuki Baleno">
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold">Registration / License Plate *</label>
+                    <input type="text" name="registrationNumber" class="form-control form-control-sm" required placeholder="e.g. BP-1-A1234">
+                  </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold">Vehicle Type *</label>
+                    <select name="vehicleType" class="form-select form-select-sm" required>
+                      <option value="Car" selected>Private Car</option>
+                      <option value="Campus Bus">Campus Bus</option>
+                      <option value="Van">Van</option>
+                      <option value="Minibus">Minibus</option>
+                      <option value="Taxi">Taxi</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold">Passenger Capacity *</label>
+                    <input type="number" name="capacity" class="form-control form-control-sm" required min="1" max="60" value="4">
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label small fw-bold">Color</label>
+                    <input type="text" name="color" class="form-control form-control-sm" placeholder="e.g. White">
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-bold">Vehicle Description (Optional)</label>
+                  <input type="text" name="description" class="form-control form-control-sm" placeholder="e.g. Clean interior, AC, luggage space">
+                </div>
+
+                <button type="submit" class="btn btn-primary-blue btn-sm fw-bold">
+                  <i class="fa-solid fa-plus me-1"></i> Add Vehicle
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Driver License & Verification -->
+        <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+          <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+            <i class="fa-solid fa-id-card text-primary me-2"></i>Driver License & Verification Submission
+          </h5>
+
+          <form action="/profile/verify-driver" method="POST">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label for="licenseNumber" class="form-label fw-bold small text-dark">Driving License Number *</label>
+                <input type="text" class="form-control" id="licenseNumber" name="licenseNumber" required placeholder="e.g. BT-DRV-102938" value="<%= verification ? verification.license_number : '' %>">
+              </div>
+              <div class="col-md-6">
+                <label for="verVehicleId" class="form-label fw-bold small text-dark">Primary Vehicle Linked</label>
+                <select name="vehicleId" id="verVehicleId" class="form-select">
+                  <option value="">Select Vehicle</option>
+                  <% if (vehicles && vehicles.length > 0) { %>
+                    <% vehicles.forEach(v => { %>
+                      <option value="<%= v.vehicle_id %>" <%= verification && verification.vehicle_id === v.vehicle_id ? 'selected' : '' %>>
+                        <%= v.vehicle_model %> (<%= v.registration_number %>)
+                      </option>
+                    <% }) %>
+                  <% } %>
+                </select>
+              </div>
+            </div>
+
+            <p class="small text-muted mb-3">
+              Campus administration verifies driver licenses and registered vehicles to maintain campus transit safety.
+            </p>
+
+            <button type="submit" class="btn btn-accent-orange btn-sm fw-bold px-4">
+              Submit for Admin Verification
+            </button>
+          </form>
+        </div>
+
+      <% } %>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,286 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <!-- Welcome Banner -->
+  <div class="card card-campus border-0 shadow-sm p-4 mb-4 bg-white">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <h2 class="fw-extrabold text-dark mb-0">Hello, <%= currentUser.name %>!</h2>
+          <span class="badge <%= currentUser.role === 'driver' ? 'bg-warning text-dark' : 'bg-primary' %> text-uppercase">
+            <%= currentUser.role %>
+          </span>
+        </div>
+        <p class="text-muted small mb-0">
+          Welcome to your Sherubtse Campus Ride portal. Find rides, share seats, or monitor your bookings.
+        </p>
+      </div>
+
+      <!-- Quick Action Buttons -->
+      <div class="d-flex flex-wrap gap-2">
+        <a href="/find-ride" class="btn btn-primary-blue fw-bold shadow-sm">
+          <i class="fa-solid fa-magnifying-glass me-1"></i> Find a Ride
+        </a>
+        <% if (currentUser.role === 'driver' || currentUser.role === 'admin') { %>
+          <a href="/offer-ride" class="btn btn-accent-orange fw-bold shadow-sm">
+            <i class="fa-solid fa-plus-circle me-1"></i> Offer a Ride
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Driver Duty Status Callout (If Driver) -->
+  <% if (currentUser.role === 'driver') { %>
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card card-campus border-0 shadow-sm p-3 bg-white">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <small class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Verification Status</small>
+              <h5 class="fw-bold mb-0">
+                <% if (isVerifiedDriver) { %>
+                  <span class="text-success"><i class="fa-solid fa-circle-check me-1"></i> Verified Driver</span>
+                <% } else { %>
+                  <span class="text-warning"><i class="fa-solid fa-clock me-1"></i> Verification Pending</span>
+                <% } %>
+              </h5>
+            </div>
+            <a href="/profile" class="btn btn-sm btn-outline-secondary">View Profile</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-campus border-0 shadow-sm p-3 bg-white">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <small class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Pending Passenger Requests</small>
+              <h5 class="fw-bold text-primary mb-0"><%= pendingRequestsCount %> Request(s)</h5>
+            </div>
+            <a href="/my-trips" class="btn btn-sm btn-primary-blue">Review in My Trips</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-campus border-0 shadow-sm p-3 bg-white">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <small class="text-muted fw-bold text-uppercase" style="font-size: 0.7rem;">Active Scheduled Trips</small>
+              <h5 class="fw-bold text-dark mb-0"><%= driverUpcomingTrips.length %> Trip(s)</h5>
+            </div>
+            <a href="/my-trips" class="btn btn-sm btn-outline-dark">Manage Trips</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+
+  <div class="row g-4 mb-4">
+    <!-- Left Column: Upcoming Confirmed Trips & Recent Requests -->
+    <div class="col-lg-8">
+      
+      <!-- Upcoming Confirmed Trips -->
+      <div class="card card-campus border-0 shadow-sm p-4 mb-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-calendar-check text-success me-2"></i>Upcoming Confirmed Trips
+          </h5>
+          <a href="/my-requests" class="btn btn-sm btn-link text-decoration-none text-primary fw-semibold">
+            All Bookings <i class="fa-solid fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+
+        <% if (upcomingConfirmedRides && upcomingConfirmedRides.length > 0) { %>
+          <div class="list-group list-group-flush">
+            <% upcomingConfirmedRides.forEach(ride => { %>
+              <div class="list-group-item px-0 py-3 border-bottom">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+                  <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <span class="<%= ride.vehicle_type === 'Campus Bus' ? 'badge-vehicle-bus' : 'badge-vehicle-car' %>" style="font-size: 0.75rem;">
+                        <i class="fa-solid <%= ride.vehicle_type === 'Campus Bus' ? 'fa-bus' : 'fa-car' %> me-1"></i>
+                        <%= ride.vehicle_type %>
+                      </span>
+                      <strong class="text-dark"><%= ride.starting_location %> ➔ <%= ride.destination %></strong>
+                    </div>
+                    <div class="small text-muted">
+                      <i class="fa-regular fa-calendar me-1"></i> <%= ride.travel_date.toISOString().split('T')[0] %> at <%= ride.departure_time.slice(0, 5) %>
+                      &bull; <i class="fa-solid fa-user me-1"></i> Driver: <strong><%= ride.driver_name %></strong> (<%= ride.driver_phone %>)
+                    </div>
+                    <div class="small text-secondary mt-1">
+                      <i class="fa-solid fa-map-pin text-primary me-1"></i> Pickup: <%= ride.pickup_location %>
+                    </div>
+                  </div>
+                  <div class="text-md-end">
+                    <span class="badge badge-status-accepted mb-2 d-inline-block">
+                      <i class="fa-solid fa-circle-check me-1"></i> Confirmed (<%= ride.seats_requested %> seat)
+                    </span>
+                    <div>
+                      <a href="/trips/<%= ride.trip_id %>" class="btn btn-outline-primary btn-sm">
+                        View Trip
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state py-4">
+            <i class="fa-solid fa-route empty-state-icon text-muted"></i>
+            <h6 class="fw-bold text-dark">No Upcoming Confirmed Rides</h6>
+            <p class="text-muted small mb-3">You don't have any confirmed seat bookings for upcoming dates.</p>
+            <a href="/find-ride" class="btn btn-primary-blue btn-sm fw-bold">
+              <i class="fa-solid fa-magnifying-glass me-1"></i> Browse Available Rides
+            </a>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Recent Requests Submitted -->
+      <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Recent Ride Requests
+          </h5>
+          <a href="/my-requests" class="btn btn-sm btn-link text-decoration-none text-primary fw-semibold">
+            View All <i class="fa-solid fa-arrow-right ms-1"></i>
+          </a>
+        </div>
+
+        <% if (recentRequests && recentRequests.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light small">
+                <tr>
+                  <th>Route</th>
+                  <th>Date & Time</th>
+                  <th>Seats</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody class="small">
+                <% recentRequests.forEach(req => { %>
+                  <tr>
+                    <td>
+                      <strong><%= req.starting_location %> ➔ <%= req.destination %></strong>
+                      <div class="text-muted" style="font-size: 0.75rem;">Driver: <%= req.driver_name %></div>
+                    </td>
+                    <td>
+                      <%= req.travel_date.toISOString().split('T')[0] %>
+                      <div class="text-muted" style="font-size: 0.75rem;"><%= req.departure_time.slice(0, 5) %></div>
+                    </td>
+                    <td><strong><%= req.seats_requested %></strong></td>
+                    <td>
+                      <% if (req.request_status === 'Pending') { %>
+                        <span class="badge badge-status-pending">Pending</span>
+                      <% } else if (req.request_status === 'Accepted') { %>
+                        <span class="badge badge-status-accepted">Accepted</span>
+                      <% } else if (req.request_status === 'Rejected') { %>
+                        <span class="badge badge-status-rejected">Rejected</span>
+                      <% } else { %>
+                        <span class="badge badge-status-cancelled">Cancelled</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <a href="/trips/<%= req.trip_id %>" class="btn btn-sm btn-outline-secondary">
+                        Details
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <p class="text-muted small text-center my-3">No submitted ride requests yet.</p>
+        <% } %>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Notifications Preview & Campus Bus / Trip Recommendations -->
+    <div class="col-lg-4">
+      
+      <!-- Notifications Card -->
+      <div class="card card-campus border-0 shadow-sm p-3 mb-4 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-bell text-warning me-1"></i> Recent Alerts
+          </h6>
+          <a href="/notifications" class="small text-primary text-decoration-none">View All</a>
+        </div>
+
+        <% if (notifications && notifications.length > 0) { %>
+          <div class="d-flex flex-column gap-2">
+            <% notifications.forEach(n => { %>
+              <div class="p-2 rounded bg-light border-start border-3 <%= n.is_read ? 'border-secondary' : 'border-warning bg-warning-subtle' %>">
+                <div class="d-flex justify-content-between align-items-center">
+                  <strong class="small text-dark"><%= n.title %></strong>
+                  <small class="text-muted" style="font-size: 0.7rem;">
+                    <%= new Date(n.created_at).toLocaleDateString() %>
+                  </small>
+                </div>
+                <p class="small text-secondary mb-1" style="font-size: 0.8rem;"><%= n.message %></p>
+                <% if (n.link) { %>
+                  <a href="<%= n.link %>" class="small text-primary fw-semibold" style="font-size: 0.75rem;">View Details &rarr;</a>
+                <% } %>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-muted small text-center my-2">No new notifications.</p>
+        <% } %>
+      </div>
+
+      <!-- Campus Bus & Popular Trip Recommendations -->
+      <div class="card card-campus border-0 shadow-sm p-3 bg-white">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-bus text-primary me-1"></i> Available Rides
+          </h6>
+          <a href="/find-ride" class="small text-primary text-decoration-none">Search</a>
+        </div>
+
+        <% if (recommendedTrips && recommendedTrips.length > 0) { %>
+          <div class="d-flex flex-column gap-3">
+            <% recommendedTrips.forEach(t => { %>
+              <div class="p-3 border rounded-3 bg-light">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                  <span class="<%= t.vehicle_type === 'Campus Bus' ? 'badge-vehicle-bus' : 'badge-vehicle-car' %>" style="font-size: 0.7rem;">
+                    <%= t.vehicle_type %>
+                  </span>
+                  <span class="badge bg-success-subtle text-success small">
+                    <%= t.available_seats %> seats left
+                  </span>
+                </div>
+                <div class="fw-bold text-dark small mb-1">
+                  <%= t.starting_location %> ➔ <%= t.destination %>
+                </div>
+                <div class="small text-muted mb-2" style="font-size: 0.75rem;">
+                  <i class="fa-regular fa-calendar me-1"></i> <%= t.travel_date.toISOString().split('T')[0] %> at <%= t.departure_time.slice(0, 5) %>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <span class="fw-bold small text-dark">Nu. <%= t.fare_or_contribution %></span>
+                  <a href="/trips/<%= t.trip_id %>" class="btn btn-sm btn-accent-orange py-1 px-2" style="font-size: 0.75rem;">
+                    Request Seat
+                  </a>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-muted small text-center my-2">No active trips currently available.</p>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

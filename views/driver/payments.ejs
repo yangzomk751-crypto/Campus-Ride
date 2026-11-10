@@ -1,0 +1,100 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-success text-white fw-bold mb-1 text-uppercase">Payment Console</span>
+        <h2 class="fw-extrabold text-white mb-0">Driver Cash Records</h2>
+        <small class="text-light text-opacity-75">
+          Driver: <%= driver.full_name %> • Record and confirm cash fares collected from passengers.
+        </small>
+      </div>
+
+      <div>
+        <a href="/driver" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-gauge me-1"></i> Driver Console
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold text-navy mb-0"><i class="fa-solid fa-hand-holding-dollar text-success me-2"></i> Collected Fares Log</h5>
+      <span class="badge bg-primary-subtle text-primary fw-semibold"><%= payments.length %> Payment Records</span>
+    </div>
+
+    <% if (payments && payments.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Booking Ref</th>
+              <th>Destination</th>
+              <th>Date</th>
+              <th>Passenger</th>
+              <th>Fare Amount (Nu.)</th>
+              <th>Status</th>
+              <th class="pe-4 text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% payments.forEach(function(p) { %>
+              <tr>
+                <td class="ps-4 fw-bold text-navy">#<%= p.booking_id %></td>
+                <td>
+                  <strong><%= p.destination %></strong>
+                  <small class="text-muted d-block">Service: <%= p.service_type %></small>
+                </td>
+                <td>
+                  <small class="text-muted"><%= p.travel_date ? new Date(p.travel_date).toLocaleDateString() : 'N/A' %></small>
+                </td>
+                <td>
+                  <strong><%= p.passenger_name %></strong>
+                  <small class="text-muted d-block"><%= p.passenger_phone %></small>
+                </td>
+                <td>
+                  <span class="fs-6 fw-bold text-navy">Nu. <%= parseFloat(p.amount || 0).toLocaleString() %></span>
+                </td>
+                <td>
+                  <% if (p.payment_status === 'Paid') { %>
+                    <span class="badge bg-success text-white"><i class="fa-solid fa-check me-1"></i> Paid (Cash)</span>
+                  <% } else if (p.payment_status === 'Waived') { %>
+                    <span class="badge bg-info text-white">Waived by Admin</span>
+                  <% } else { %>
+                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-start me-1"></i> Pending Cash</span>
+                  <% } %>
+                </td>
+                <td class="pe-4 text-end">
+                  <% if (p.payment_status === 'Pending') { %>
+                    <form action="/driver/trips/<%= p.booking_id %>/payment" method="POST" class="d-inline" onsubmit="return confirm('Confirm receipt of Nu. <%= p.amount %> in cash from passenger?');">
+                      <input type="hidden" name="notes" value="Cash collected by Driver <%= driver.full_name %>">
+                      <button type="submit" class="btn btn-success btn-sm rounded-pill px-3 fw-bold">
+                        <i class="fa-solid fa-check me-1"></i> Mark as Paid
+                      </button>
+                    </form>
+                  <% } else { %>
+                    <span class="text-muted small"><i class="fa-solid fa-circle-check text-success me-1"></i> Settled</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5 text-muted">
+        <i class="fa-solid fa-receipt fs-1 opacity-50 mb-2"></i>
+        <p class="mb-0">No cash payment records linked to your driver profile yet.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

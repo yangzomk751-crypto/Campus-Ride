@@ -1,0 +1,136 @@
+<%- include('../partials/header') %>
+  <%- include('../partials/navbar') %>
+    <%- include('../partials/alerts') %>
+
+      <main class="container py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+          <div>
+            <h2 class="fw-extrabold text-dark mb-1">
+              <i class="fa-solid fa-tags text-primary me-2"></i>Official Fixed Travel Rates
+            </h2>
+            <p class="text-muted small mb-0">Approved standard fare cards for Sherubtse Campus Taxis and College Buses
+            </p>
+          </div>
+          <div class="d-flex gap-2">
+            <a href="/book-taxi" class="btn btn-warning btn-sm fw-bold text-dark">
+              <i class="fa-solid fa-taxi me-1"></i> Book Taxi
+            </a>
+            <a href="/book-bus" class="btn btn-primary-blue btn-sm fw-bold">
+              <i class="fa-solid fa-bus me-1"></i> Reserve Bus (Class Trip)
+            </a>
+          </div>
+        </div>
+
+        <!-- Taxi Rates Card -->
+        <div class="card card-campus border-0 shadow-sm p-4 mb-4 bg-white"
+          style="border-top: 4px solid var(--accent-orange) !important;">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="badge bg-warning text-dark p-2 rounded-circle fs-5">
+              <i class="fa-solid fa-taxi"></i>
+            </span>
+            <div>
+              <h4 class="fw-bold mb-0">Campus Taxi Fixed Rates</h4>
+              <small class="text-muted">Flat rates for 1 to 4 passenger short-distance and town transfers</small>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+              <thead class="table-light">
+                <tr>
+                  <th>Route / Journey</th>
+                  <th>Pickup Location</th>
+                  <th>Destination</th>
+                  <th>Standard Fare</th>
+                  <th>Fare Policy</th>
+                  <th>Est. Duration</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (taxiRates && taxiRates.length> 0) { %>
+                  <% taxiRates.forEach(rate=> { %>
+                    <tr>
+                      <td class="fw-bold text-dark">
+                        <%= rate.route_name %>
+                      </td>
+                      <td>
+                        <%= rate.pickup_location %>
+                      </td>
+                      <td>
+                        <%= rate.destination %>
+                      </td>
+                      <td><strong class="text-primary fs-6">Nu. <%= rate.standard_fare %></strong></td>
+                      <td><span class="badge bg-light text-dark border">
+                          <%= rate.fare_type %>
+                        </span></td>
+                      <td><i class="fa-regular fa-clock me-1 text-secondary"></i>
+                        <%= rate.estimated_duration %>
+                      </td>
+                    </tr>
+                    <% }) %>
+                      <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- College Bus Rates Card -->
+        <div class="card card-campus border-0 shadow-sm p-4 bg-white"
+          style="border-top: 4px solid var(--primary-blue) !important;">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <span class="badge bg-primary text-white p-2 rounded-circle fs-5">
+              <i class="fa-solid fa-bus"></i>
+            </span>
+            <div>
+              <h4 class="fw-bold mb-0">Group Bus Rates & Outing Tariffs</h4>
+              <small class="text-muted">Standard hire and per-passenger rates for trips with friends, excursions &
+                student groups</small>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+              <thead class="table-light">
+                <tr>
+                  <th>Trip Type & Destination</th>
+                  <th>Pickup Location</th>
+                  <th>Destination</th>
+                  <th>Standard Rate</th>
+                  <th>Structure</th>
+                  <th>Est. Travel Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (busRates && busRates.length> 0) { %>
+                  <% busRates.forEach(rate=> { %>
+                    <tr>
+                      <td class="fw-bold text-dark">
+                        <%= rate.route_name %>
+                      </td>
+                      <td>
+                        <%= rate.pickup_location %>
+                      </td>
+                      <td>
+                        <%= rate.destination %>
+                      </td>
+                      <td>
+                        <strong class="text-primary fs-6">
+                          <%= rate.standard_fare> 0 ? `Nu. ${rate.standard_fare}` : 'FREE' %>
+                        </strong>
+                      </td>
+                      <td><span class="badge bg-light text-dark border">
+                          <%= rate.fare_type %>
+                        </span></td>
+                      <td><i class="fa-regular fa-clock me-1 text-secondary"></i>
+                        <%= rate.estimated_duration %>
+                      </td>
+                    </tr>
+                    <% }) %>
+                      <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+
+      <%- include('../partials/footer') %>

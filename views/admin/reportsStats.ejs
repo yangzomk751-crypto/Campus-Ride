@@ -1,0 +1,96 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">Analytics & Reports</span>
+        <h2 class="fw-extrabold text-white mb-0">System Reports & Statistics</h2>
+        <small class="text-light text-opacity-75">
+          Sherubtse College Campus Ride Comprehensive Operational Report
+        </small>
+      </div>
+
+      <div>
+        <a href="/admin" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-arrow-left me-1"></i> Admin Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <!-- High Level Summary -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+        <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-chart-pie text-primary me-2"></i> Bookings by Service Type</h5>
+        <div class="p-3 bg-light rounded-3 border mb-3">
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+            <span><i class="fa-solid fa-person-walking-luggage text-warning me-2"></i> Weekday Rides</span>
+            <strong class="text-navy fs-6"><%= bookingStats.weekday_rides_count %> Trips</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+            <span><i class="fa-solid fa-taxi text-primary me-2"></i> Campus Taxis</span>
+            <strong class="text-navy fs-6"><%= bookingStats.taxis_count %> Trips</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-2">
+            <span><i class="fa-solid fa-bus text-info me-2"></i> College Buses</span>
+            <strong class="text-navy fs-6"><%= bookingStats.buses_count %> Trips</strong>
+          </div>
+        </div>
+        <div class="small text-muted">
+          All three services operate strictly under verified campus driver supervision and conflict-prevention algorithms.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+        <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-money-bill-trend-up text-success me-2"></i> Financial Accounting</h5>
+        <div class="p-3 bg-light rounded-3 border mb-3">
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+            <span>Cash Fares Paid & Settled:</span>
+            <strong class="text-success fs-6">Nu. <%= paymentStats.paid_amount.toLocaleString() %></strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+            <span>Pending Passenger Collections:</span>
+            <strong class="text-warning fs-6">Nu. <%= paymentStats.pending_amount.toLocaleString() %></strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center py-2">
+            <span>Waived Official College Journeys:</span>
+            <strong class="text-info fs-6">Nu. <%= paymentStats.waived_amount.toLocaleString() %></strong>
+          </div>
+        </div>
+        <div class="small text-muted">
+          Cash payment accountability is verified via driver submission upon trip completion.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Operational Health & Dzongkhag Coverage -->
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-mountain text-primary me-2"></i> Dzongkhag Coverage & Active Rates</h5>
+    <p class="text-muted small mb-3">
+      Campus Ride maintains official fixed rates for <strong>all 20 Dzongkhags of Bhutan</strong> from Sherubtse College (Kanglung).
+    </p>
+
+    <div class="row g-2">
+      <% allRates.forEach(function(r) { %>
+        <div class="col-sm-6 col-md-4 col-lg-3">
+          <div class="p-2 bg-light rounded-3 border small d-flex justify-content-between align-items-center">
+            <span class="text-navy fw-semibold text-truncate"><%= r.destination %></span>
+            <span class="badge bg-secondary">Nu. <%= parseFloat(r.bus_fare) %>/Nu. <%= parseFloat(r.taxi_fare) %></span>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

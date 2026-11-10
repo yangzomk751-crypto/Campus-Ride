@@ -1,0 +1,202 @@
+<nav class="navbar navbar-expand-lg navbar-dark navbar-campus sticky-top shadow-sm py-2">
+  <% 
+    const activePath = typeof currentPath !== 'undefined' ? currentPath : ''; 
+    const user = typeof currentUser !== 'undefined' ? currentUser : null;
+  %>
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/">
+      <div class="navbar-brand-logo">
+        <i class="fa-solid fa-van-shuttle"></i>
+      </div>
+      <div>
+        <span class="fw-bold tracking-tight d-block fs-5 text-white">Campus Ride</span>
+        <small class="text-warning text-uppercase fw-semibold" style="font-size: 0.65rem; letter-spacing: 1px;">
+          Sherubtse College, Bhutan
+        </small>
+      </div>
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+        <li class="nav-item">
+          <a class="nav-link <%= activePath === '/' ? 'active fw-bold text-white' : '' %>" href="/">
+            <i class="fa-solid fa-house me-1"></i> Home
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link <%= activePath === '/services' ? 'active fw-bold text-white' : '' %>" href="/services">
+            <i class="fa-solid fa-road me-1"></i> Services
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link <%= activePath === '/fare-chart' || activePath === '/rates' ? 'active fw-bold text-white' : '' %>" href="/fare-chart">
+            <i class="fa-solid fa-tags me-1"></i> Fare Chart
+          </a>
+        </li>
+
+        <% if (user) { %>
+          <% if (user.role === 'passenger') { %>
+            <!-- Passenger Specific Links -->
+            <li class="nav-item">
+              <a class="nav-link text-warning fw-semibold <%= activePath === '/weekday-rides' ? 'active fw-bold text-white' : '' %>" href="/weekday-rides">
+                <i class="fa-solid fa-person-walking-luggage me-1"></i> Weekday Rides
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-info fw-semibold <%= activePath === '/book-taxi' ? 'active fw-bold text-white' : '' %>" href="/book-taxi">
+                <i class="fa-solid fa-taxi me-1"></i> Book Taxi
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-light fw-semibold <%= activePath === '/book-bus' ? 'active fw-bold text-white' : '' %>" href="/book-bus">
+                <i class="fa-solid fa-bus me-1"></i> Request Bus
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= activePath === '/my-bookings' ? 'active fw-bold text-white' : '' %>" href="/my-bookings">
+                <i class="fa-solid fa-calendar-check me-1"></i> My Bookings
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= activePath === '/payments' ? 'active fw-bold text-white' : '' %>" href="/payments">
+                <i class="fa-solid fa-wallet me-1"></i> Payments
+              </a>
+            </li>
+          <% } %>
+
+          <% if (user.role === 'driver') { %>
+            <!-- Driver Specific Links -->
+            <li class="nav-item">
+              <a class="nav-link text-success fw-bold <%= activePath === '/driver' ? 'active fw-bold text-white' : '' %>" href="/driver">
+                <i class="fa-solid fa-id-badge me-1"></i> Driver Console
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= activePath === '/driver/requests' ? 'active fw-bold text-white' : '' %>" href="/driver/requests">
+                <i class="fa-solid fa-bell me-1"></i> Ride Requests
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= activePath === '/driver/trips' ? 'active fw-bold text-white' : '' %>" href="/driver/trips">
+                <i class="fa-solid fa-route me-1"></i> Upcoming Trips
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= activePath === '/driver/bus-trips' ? 'active fw-bold text-white' : '' %>" href="/driver/bus-trips">
+                <i class="fa-solid fa-bus me-1"></i> Assigned Buses
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= activePath === '/driver/payments' ? 'active fw-bold text-white' : '' %>" href="/driver/payments">
+                <i class="fa-solid fa-money-bill-wave me-1"></i> Cash Records
+              </a>
+            </li>
+          <% } %>
+
+          <% if (user.role === 'admin') { %>
+            <!-- Admin Dropdown -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-warning fw-bold" href="#" id="adminNavDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-shield-halved me-1"></i> Admin Console
+              </a>
+              <ul class="dropdown-menu dropdown-menu-dark shadow" aria-labelledby="adminNavDropdown">
+                <li><a class="dropdown-item" href="/admin"><i class="fa-solid fa-chart-pie me-2"></i> Operations Dashboard</a></li>
+                <li><a class="dropdown-item" href="/admin/bookings"><i class="fa-solid fa-list-check me-2"></i> All Bookings</a></li>
+                <li><a class="dropdown-item" href="/admin/weekday-rides"><i class="fa-solid fa-person-walking-luggage me-2"></i> Weekday Rides</a></li>
+                <li><a class="dropdown-item" href="/admin/taxi-requests"><i class="fa-solid fa-taxi me-2"></i> Taxi Requests</a></li>
+                <li><a class="dropdown-item" href="/admin/bus-requests"><i class="fa-solid fa-bus me-2"></i> Bus Requests & Assign</a></li>
+                <li><a class="dropdown-item" href="/admin/quotations"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Custom Fare Quotes</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/admin/fare-chart"><i class="fa-solid fa-tags me-2"></i> Fare Chart (20 Dzongkhags)</a></li>
+                <li><a class="dropdown-item" href="/admin/vehicles"><i class="fa-solid fa-car me-2"></i> Fleet (Taxis & Buses)</a></li>
+                <li><a class="dropdown-item" href="/admin/drivers"><i class="fa-solid fa-id-card me-2"></i> Manage & Verify Drivers</a></li>
+                <li><a class="dropdown-item" href="/admin/passengers"><i class="fa-solid fa-users me-2"></i> Manage Passengers</a></li>
+                <li><a class="dropdown-item" href="/admin/payments"><i class="fa-solid fa-wallet me-2"></i> Payment Management</a></li>
+                <li><a class="dropdown-item" href="/admin/reports-stats"><i class="fa-solid fa-chart-line me-2"></i> Reports & Statistics</a></li>
+                <li><a class="dropdown-item" href="/admin/settings"><i class="fa-solid fa-gear me-2"></i> System Settings</a></li>
+              </ul>
+            </li>
+          <% } %>
+        <% } %>
+      </ul>
+
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-2">
+        <li class="nav-item">
+          <a class="nav-link <%= activePath === '/about' ? 'active text-white' : '' %>" href="/about">
+            About
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= activePath === '/contact' ? 'active text-white' : '' %>" href="/contact">
+            Contact
+          </a>
+        </li>
+
+        <% if (user) { %>
+          <!-- Notifications Bell -->
+          <li class="nav-item me-2">
+            <a href="/notifications" class="nav-link position-relative px-2 text-white" title="Notifications">
+              <i class="fa-solid fa-bell fs-5"></i>
+              <% if (typeof unreadNotifCount !== 'undefined' && unreadNotifCount > 0) { %>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                  <%= unreadNotifCount %>
+                </span>
+              <% } %>
+            </a>
+          </li>
+
+          <!-- User Menu Dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 text-white" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                <%= user.fullName.charAt(0) %>
+              </div>
+              <span class="d-none d-lg-inline small"><%= user.fullName %></span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userMenuDropdown">
+              <li class="dropdown-header">
+                <span class="d-block fw-bold text-dark"><%= user.fullName %></span>
+                <small class="text-muted text-capitalize">
+                  Role: <span class="badge bg-primary text-white"><%= user.role %></span>
+                  <% if (user.passengerType) { %>
+                    (<%= user.passengerType %>)
+                  <% } %>
+                </small>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <% if (user.role === 'admin') { %>
+                <li><a class="dropdown-item" href="/admin"><i class="fa-solid fa-gauge me-2 text-primary"></i> Admin Dashboard</a></li>
+              <% } else if (user.role === 'driver') { %>
+                <li><a class="dropdown-item" href="/driver"><i class="fa-solid fa-gauge me-2 text-primary"></i> Driver Console</a></li>
+              <% } else { %>
+                <li><a class="dropdown-item" href="/dashboard"><i class="fa-solid fa-gauge me-2 text-primary"></i> Passenger Dashboard</a></li>
+                <li><a class="dropdown-item" href="/my-bookings"><i class="fa-solid fa-calendar-check me-2 text-primary"></i> My Bookings</a></li>
+                <li><a class="dropdown-item" href="/payments"><i class="fa-solid fa-receipt me-2 text-primary"></i> Payment History</a></li>
+              <% } %>
+              <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user me-2 text-muted"></i> Profile Settings</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i> Sign Out</a></li>
+            </ul>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link text-white fw-medium" href="/login">
+              <i class="fa-solid fa-right-to-bracket me-1"></i> Sign In
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-warning btn-sm text-dark fw-bold px-3 shadow-sm rounded-pill" href="/register">
+              <i class="fa-solid fa-user-plus me-1"></i> Register
+            </a>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>

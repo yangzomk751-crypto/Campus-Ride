@@ -1,0 +1,25 @@
+<div class="container mt-3">
+  <% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
+    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 d-flex align-items-center gap-2" role="alert">
+      <i class="fa-solid fa-circle-check fs-5 text-success"></i>
+      <div class="flex-grow-1"><%= success_msg %></div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+
+  <% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 d-flex align-items-center gap-2" role="alert">
+      <i class="fa-solid fa-triangle-exclamation fs-5 text-danger"></i>
+      <div class="flex-grow-1"><%= error_msg %></div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+
+  <% if (typeof info_msg !== 'undefined' && info_msg && info_msg.length > 0) { %>
+    <div class="alert alert-info alert-dismissible fade show shadow-sm border-0 d-flex align-items-center gap-2" role="alert">
+      <i class="fa-solid fa-circle-info fs-5 text-primary"></i>
+      <div class="flex-grow-1"><%= info_msg %></div>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% } %>
+</div>

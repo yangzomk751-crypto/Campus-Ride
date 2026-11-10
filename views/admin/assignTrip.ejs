@@ -1,0 +1,106 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="fw-bold mb-1 text-dark">
+            <i class="fa-solid fa-user-plus text-primary me-2"></i> Assign Vehicle & Driver
+          </h2>
+          <p class="text-muted small mb-0">Booking #<%= booking.booking_id %> (<%= booking.booking_type %>)</p>
+        </div>
+        <a href="/admin/bookings" class="btn btn-outline-secondary btn-sm btn-rounded">
+          <i class="fa-solid fa-arrow-left me-1"></i> Back to Requests
+        </a>
+      </div>
+
+      <!-- Booking Summary Card -->
+      <div class="card border-0 shadow-sm p-4 mb-4 bg-light">
+        <h6 class="fw-bold text-dark text-uppercase small mb-3">Booking Information</h6>
+        <div class="row g-3 small">
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Requester:</span>
+            <strong class="text-dark"><%= booking.requester_name %> (<%= booking.requester_role %>)</strong>
+            <small class="text-muted d-block"><%= booking.requester_phone || booking.requester_email %></small>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Journey Route:</span>
+            <strong class="text-dark"><%= booking.pickup_location %> ➔ <%= booking.destination %></strong>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Travel Schedule:</span>
+            <strong class="text-primary"><%= new Date(booking.travel_date).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) %> at <%= booking.departure_time %></strong>
+          </div>
+          <div class="col-sm-6">
+            <span class="text-muted d-block">Passengers:</span>
+            <strong class="text-dark"><%= booking.passenger_count %> Person(s)</strong>
+          </div>
+          <% if (booking.trip_purpose) { %>
+            <div class="col-12">
+              <span class="text-muted d-block">Purpose:</span>
+              <p class="mb-0 text-secondary"><%= booking.trip_purpose %></p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Assignment Form -->
+      <div class="card border-0 shadow-sm p-4">
+        <form action="/admin/bookings/<%= booking.booking_id %>/assign" method="POST">
+          
+          <div class="mb-3">
+            <label for="vehicleId" class="form-label fw-semibold small">
+              <i class="fa-solid fa-car-side text-primary me-1"></i> Select Vehicle (<%= booking.booking_type %>) *
+            </label>
+            <select class="form-select" id="vehicleId" name="vehicleId" required>
+              <option value="">-- Choose matching <%= booking.booking_type %> --</option>
+              <% vehicles.forEach(v => { %>
+                <option value="<%= v.vehicle_id %>" <%= booking.vehicle_plate === v.registration_number ? 'selected' : '' %>>
+                  <%= v.registration_number %> • <%= v.vehicle_type %> (Capacity: <%= v.capacity %> seats) - <%= v.description %>
+                </option>
+              <% }) %>
+            </select>
+            <div class="form-text small text-muted">Vehicle capacity must accommodate the requested passenger count (<%= booking.passenger_count %>).</div>
+          </div>
+
+          <div class="mb-4">
+            <label for="driverId" class="form-label fw-semibold small">
+              <i class="fa-solid fa-id-card-clip text-success me-1"></i> Select Assigned Driver *
+            </label>
+            <select class="form-select" id="driverId" name="driverId" required>
+              <option value="">-- Choose certified driver --</option>
+              <% drivers.forEach(d => { %>
+                <option value="<%= d.driver_id %>" <%= booking.driver_name === d.full_name ? 'selected' : '' %>>
+                  <%= d.full_name %> • Contact: <%= d.phone %> (License: <%= d.license_number %>)
+                </option>
+              <% }) %>
+            </select>
+          </div>
+
+          <!-- Conflict Prevention Alert (Chapter 7.5 / FR14) -->
+          <div class="alert alert-warning small d-flex align-items-center mb-4">
+            <i class="fa-solid fa-shield-halved fs-4 me-3 text-warning"></i>
+            <div>
+              <strong>Automated Conflict Checking:</strong>
+              The system will automatically verify that neither the selected vehicle nor the driver is already assigned to another confirmed trip during this scheduled time.
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="/admin/bookings" class="btn btn-outline-secondary px-4 btn-rounded">Cancel</a>
+            <button type="submit" class="btn btn-primary px-5 fw-bold btn-rounded shadow-sm">
+              <i class="fa-solid fa-check me-1"></i> Confirm Trip Assignment
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

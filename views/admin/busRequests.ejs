@@ -1,0 +1,188 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h2 class="fw-extrabold text-white mb-0">Manage Campus Bus Requests</h2>
+        <small class="text-light text-opacity-75">
+          Review class study tours, provide official fare quotations, and allocate institutional buses & drivers.
+        </small>
+      </div>
+
+      <div>
+        <a href="/admin/quotations" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3 shadow-sm">
+          <i class="fa-solid fa-file-invoice-dollar me-1"></i> Custom Quotations
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold text-navy mb-0"><i class="fa-solid fa-bus text-info me-2"></i> Campus Bus Trips (<%= bookings.length %>)</h5>
+    </div>
+
+    <% if (bookings && bookings.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Ref #</th>
+              <th>Group Leader</th>
+              <th>Destination</th>
+              <th>Travel Date</th>
+              <th>Pax</th>
+              <th>Quotation Status</th>
+              <th>Agreed Fare (Nu.)</th>
+              <th>Assigned Bus & Driver</th>
+              <th>Status</th>
+              <th class="pe-4 text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% bookings.forEach(function(b) { %>
+              <tr>
+                <td class="ps-4 fw-bold text-navy">#<%= b.booking_id %></td>
+                <td>
+                  <strong><%= b.passenger_name %></strong>
+                  <small class="text-muted d-block"><%= b.passenger_phone %></small>
+                </td>
+                <td>
+                  <strong class="text-navy"><%= b.destination %></strong>
+                  <small class="text-muted d-block text-truncate" style="max-width: 180px;"><%= b.trip_purpose %></small>
+                </td>
+                <td>
+                  <small class="text-muted"><%= b.travel_date %> <%= b.departure_time %></small>
+                </td>
+                <td>
+                  <span class="badge bg-info text-white fw-bold"><%= b.passenger_count %> Pax</span>
+                </td>
+                <td>
+                  <% if (b.quotation_status === 'Pending Admin Quotation') { %>
+                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-start me-1"></i> Needs Quote</span>
+                  <% } else if (b.quotation_status === 'Quoted') { %>
+                    <span class="badge bg-primary-subtle text-primary fw-bold">Quoted (Nu. <%= b.quoted_fare %>)</span>
+                  <% } else if (b.quotation_status === 'Accepted') { %>
+                    <span class="badge bg-success-subtle text-success fw-bold"><i class="fa-solid fa-check me-1"></i> Quote Accepted</span>
+                  <% } else if (b.quotation_status === 'Declined') { %>
+                    <span class="badge bg-danger-subtle text-danger">Declined</span>
+                  <% } else { %>
+                    <span class="badge bg-light text-dark border">Standard</span>
+                  <% } %>
+                </td>
+                <td>
+                  <strong class="text-navy">Nu. <%= parseFloat(b.total_fare || 0).toLocaleString() %></strong>
+                </td>
+                <td>
+                  <% if (b.driver_name && b.registration_number) { %>
+                    <span class="fw-semibold text-dark"><%= b.registration_number %></span>
+                    <small class="text-muted d-block">Driver: <%= b.driver_name %></small>
+                  <% } else { %>
+                    <span class="text-muted small">Not Assigned</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (b.booking_status === 'Confirmed') { %>
+                    <span class="badge bg-primary text-white">Confirmed</span>
+                  <% } else if (b.booking_status === 'In Progress') { %>
+                    <span class="badge bg-info text-dark">In Progress</span>
+                  <% } else if (b.booking_status === 'Completed') { %>
+                    <span class="badge bg-success text-white">Completed</span>
+                  <% } else if (b.booking_status === 'Cancelled' || b.booking_status === 'Rejected') { %>
+                    <span class="badge bg-danger text-white"><%= b.booking_status %></span>
+                  <% } else { %>
+                    <span class="badge bg-warning text-dark">Pending</span>
+                  <% } %>
+                </td>
+                <td class="pe-4 text-end">
+                  <% if (b.quotation_status === 'Pending Admin Quotation') { %>
+                    <a href="/admin/quotations" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3">
+                      Quote Fare
+                    </a>
+                  <% } else if (b.booking_status === 'Pending' || b.quotation_status === 'Accepted' || !b.assigned_driver_id) { %>
+                    <button type="button" class="btn btn-info btn-sm text-white fw-bold rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#assignBusModal_<%= b.booking_id %>">
+                      Assign Bus
+                    </button>
+                  <% } else { %>
+                    <a href="/bookings/<%= b.booking_id %>" class="btn btn-outline-primary btn-sm rounded-pill px-2">
+                      View
+                    </a>
+                  <% } %>
+                </td>
+              </tr>
+
+              <!-- Modal to Assign Bus and Driver -->
+              <div class="modal fade" id="assignBusModal_<%= b.booking_id %>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-navy text-white">
+                      <h5 class="modal-title fw-bold">
+                        <i class="fa-solid fa-van-shuttle me-2 text-info"></i>Assign Fleet for Bus Trip #<%= b.booking_id %>
+                      </h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/admin/bus-requests/<%= b.booking_id %>/assign" method="POST">
+                      <div class="modal-body p-4 text-start">
+                        <div class="p-3 bg-light rounded-3 border mb-3 small">
+                          <strong class="d-block text-navy">Destination: <%= b.destination %></strong>
+                          <span>Date: <%= b.travel_date %> at <%= b.departure_time %> • <%= b.passenger_count %> Passengers</span>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label fw-bold small text-navy">Select College Bus (Capacity Check) *</label>
+                          <select name="vehicleId" class="form-select" required>
+                            <option value="" disabled selected>-- Select an institutional bus --</option>
+                            <% availableBuses.forEach(function(veh) { %>
+                              <option value="<%= veh.vehicle_id %>">
+                                <%= veh.vehicle_model %> (<%= veh.registration_number %>) • Capacity: <%= veh.capacity %> Pax
+                              </option>
+                            <% }); %>
+                          </select>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label fw-bold small text-navy">Select Verified Heavy Vehicle Driver *</label>
+                          <select name="driverId" class="form-select" required>
+                            <option value="" disabled selected>-- Select an approved driver --</option>
+                            <% approvedDrivers.forEach(function(drv) { %>
+                              <option value="<%= drv.driver_id %>">
+                                <%= drv.full_name %> • License: <%= drv.license_number %>
+                              </option>
+                            <% }); %>
+                          </select>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label fw-bold small text-navy">Administrative Dispatch Notes</label>
+                          <input type="text" name="adminNotes" class="form-control" placeholder="e.g. Bus inspected for long-distance highway travel">
+                        </div>
+                      </div>
+                      <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">
+                          Confirm Bus & Driver Assignment
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5 text-muted">
+        <p class="mb-0">No bus requests registered.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

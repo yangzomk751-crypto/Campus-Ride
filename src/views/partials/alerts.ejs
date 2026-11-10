@@ -1,0 +1,25 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+  <% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
+    <div class="flash-alert mb-4 flex items-center justify-between p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 shadow-sm" role="alert">
+      <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+        <span class="text-sm font-medium"><%= success_msg %></span>
+      </div>
+      <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  <% } %>
+
+  <% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
+    <div class="flash-alert mb-4 flex items-center justify-between p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 shadow-sm" role="alert">
+      <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-circle-exclamation text-rose-600 text-lg"></i>
+        <span class="text-sm font-medium"><%= error_msg %></span>
+      </div>
+      <button type="button" onclick="this.parentElement.remove()" class="text-rose-500 hover:text-rose-700">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  <% } %>
+</div>

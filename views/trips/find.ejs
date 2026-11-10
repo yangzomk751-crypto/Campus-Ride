@@ -1,0 +1,179 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <!-- Page Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+      <h2 class="fw-extrabold text-dark mb-1">Find a Campus Ride</h2>
+      <p class="text-muted small mb-0">Search available student carpools and scheduled Campus Bus departures</p>
+    </div>
+    <% if (currentUser && (currentUser.role === 'driver' || currentUser.role === 'admin')) { %>
+      <a href="/offer-ride" class="btn btn-accent-orange fw-bold">
+        <i class="fa-solid fa-plus-circle me-1"></i> Offer a Ride
+      </a>
+    <% } %>
+  </div>
+
+  <!-- Filter & Search Card -->
+  <div class="card card-campus border-0 shadow-sm p-4 mb-4 bg-white">
+    <form action="/find-ride" method="GET" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-dark mb-1">
+          <i class="fa-solid fa-location-dot text-primary me-1"></i> Starting Location
+        </label>
+        <input type="text" name="startLocation" class="form-control" placeholder="e.g. Trashigang Town" value="<%= query.startLocation %>">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-dark mb-1">
+          <i class="fa-solid fa-flag-checkered text-warning me-1"></i> Destination
+        </label>
+        <input type="text" name="destination" class="form-control" placeholder="e.g. Kanglung (College)" value="<%= query.destination %>">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small fw-bold text-dark mb-1">
+          <i class="fa-regular fa-calendar me-1"></i> Travel Date
+        </label>
+        <input type="date" name="travelDate" class="form-control" value="<%= query.travelDate %>">
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small fw-bold text-dark mb-1">
+          <i class="fa-solid fa-bus text-info me-1"></i> Vehicle Type
+        </label>
+        <select name="vehicleType" class="form-select">
+          <option value="all" <%= query.vehicleType === 'all' ? 'selected' : '' %>>All Types</option>
+          <option value="Campus Bus" <%= query.vehicleType === 'Campus Bus' ? 'selected' : '' %>>Campus Bus 🚌</option>
+          <option value="Car" <%= query.vehicleType === 'Car' ? 'selected' : '' %>>Private Car 🚗</option>
+          <option value="Van" <%= query.vehicleType === 'Van' ? 'selected' : '' %>>Van / Minibus 🚐</option>
+          <option value="Taxi" <%= query.vehicleType === 'Taxi' ? 'selected' : '' %>>Campus Taxi 🚖</option>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label small fw-bold text-dark mb-1">
+          <i class="fa-solid fa-arrow-down-short-wide me-1"></i> Sort By
+        </label>
+        <select name="sort" class="form-select">
+          <option value="date_asc" <%= query.sort === 'date_asc' ? 'selected' : '' %>>Departure Time</option>
+          <option value="fare_asc" <%= query.sort === 'fare_asc' ? 'selected' : '' %>>Lowest Fare</option>
+          <option value="seats_desc" <%= query.sort === 'seats_desc' ? 'selected' : '' %>>Most Seats Left</option>
+        </select>
+      </div>
+
+      <div class="col-12 d-flex justify-content-between align-items-center pt-2">
+        <div>
+          <span class="text-secondary small">
+            Found <strong><%= trips.length %></strong> available ride(s)
+          </span>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/find-ride" class="btn btn-outline-secondary btn-sm">Reset Filters</a>
+          <button type="submit" class="btn btn-primary-blue btn-sm px-4 fw-bold">
+            <i class="fa-solid fa-filter me-1"></i> Filter Results
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Trips Results Grid -->
+  <% if (trips && trips.length > 0) { %>
+    <div class="row g-4">
+      <% trips.forEach(trip => { %>
+        <div class="col-lg-4 col-md-6">
+          <div class="card card-campus h-100 p-4 border-0 shadow-sm d-flex flex-column">
+            
+            <!-- Card Top: Vehicle Type Badge & Remaining Seats -->
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <span class="<%= trip.vehicle_type === 'Campus Bus' ? 'badge-vehicle-bus' : 'badge-vehicle-car' %>">
+                <i class="fa-solid <%= trip.vehicle_type === 'Campus Bus' ? 'fa-bus' : 'fa-car' %> me-1"></i>
+                <%= trip.vehicle_type %>
+              </span>
+              <span class="badge bg-success-subtle text-success fw-bold px-2 py-1 rounded">
+                <i class="fa-solid fa-chair me-1"></i> <%= trip.available_seats %> / <%= trip.total_seats %> seats left
+              </span>
+            </div>
+
+            <!-- Route Info -->
+            <div class="mb-3">
+              <div class="route-node mb-2">
+                <strong class="d-block text-dark"><%= trip.starting_location %></strong>
+                <small class="text-muted"><i class="fa-solid fa-map-pin text-primary me-1"></i> Pickup: <%= trip.pickup_location %></small>
+              </div>
+              <div class="route-node destination">
+                <strong class="d-block text-dark"><%= trip.destination %></strong>
+              </div>
+            </div>
+
+            <!-- Schedule -->
+            <div class="d-flex justify-content-between align-items-center small text-secondary py-2 border-top border-bottom mb-3">
+              <div>
+                <i class="fa-regular fa-calendar me-1"></i> <%= trip.travel_date.toISOString().split('T')[0] %>
+              </div>
+              <div>
+                <i class="fa-regular fa-clock me-1"></i> <%= trip.departure_time.slice(0, 5) %>
+              </div>
+            </div>
+
+            <!-- Driver & Vehicle Details -->
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <div class="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 38px; height: 38px;">
+                <%= trip.driver_name.charAt(0) %>
+              </div>
+              <div class="flex-grow-1">
+                <div class="d-flex align-items-center gap-1">
+                  <span class="small fw-bold text-dark"><%= trip.driver_name %></span>
+                  <% if (trip.verification_status === 'Verified') { %>
+                    <i class="fa-solid fa-circle-check text-info" title="Verified Driver" style="font-size: 0.8rem;"></i>
+                  <% } %>
+                </div>
+                <div class="small text-muted" style="font-size: 0.75rem;">
+                  <%= trip.vehicle_model || 'Standard Vehicle' %> &bull; <%= trip.registration_number || '' %>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Bottom: Price and Action Button -->
+            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+              <div>
+                <span class="fs-5 fw-bold text-dark">
+                  <%= trip.fare_or_contribution > 0 ? `Nu. ${trip.fare_or_contribution}` : 'Free Shuttle' %>
+                </span>
+                <small class="text-muted d-block" style="font-size: 0.7rem;">per seat</small>
+              </div>
+              <a href="/trips/<%= trip.trip_id %>" class="btn btn-accent-orange btn-sm px-3 fw-bold">
+                View & Request <i class="fa-solid fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <!-- Empty State -->
+    <div class="empty-state py-5 bg-white">
+      <i class="fa-solid fa-road-circle-exclamation empty-state-icon"></i>
+      <h4 class="fw-bold text-dark">No Available Trips Found</h4>
+      <p class="text-muted small mb-4">
+        We could not find any active trips matching your search criteria. Try modifying your route, travel date, or vehicle filter.
+      </p>
+      <div class="d-flex justify-content-center gap-2">
+        <a href="/find-ride" class="btn btn-outline-primary btn-sm fw-bold">
+          View All Active Trips
+        </a>
+        <% if (currentUser && (currentUser.role === 'driver' || currentUser.role === 'admin')) { %>
+          <a href="/offer-ride" class="btn btn-accent-orange btn-sm fw-bold">
+            Publish This Route as Driver
+          </a>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+</main>
+
+<%- include('../partials/footer') %>

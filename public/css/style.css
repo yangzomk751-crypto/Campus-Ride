@@ -1,0 +1,311 @@
+/* ============================================================
+   CAMPUS RIDE - DESIGN SYSTEM & THEME
+   College Transportation & Ride Booking System
+   Palette:
+     Primary: Royal Blue (#2563EB)
+     Accent: Orange (#F97316)
+     Background: White (#FFFFFF) & Light Grey (#F3F4F6)
+     Text/Headings: Dark Navy (#172554)
+     Highlights/Borders: Soft Blue (#DBEAFE)
+   ============================================================ */
+
+:root {
+  --primary-blue: #2563eb;
+  --primary-blue-hover: #1d4ed8;
+  --accent-orange: #f97316;
+  --accent-orange-hover: #ea580c;
+  --dark-navy: #172554;
+  --navy-light: #1e3a8a;
+  --light-grey: #f3f4f6;
+  --card-bg: #ffffff;
+  --soft-blue: #dbeafe;
+  --soft-blue-border: #bfdbfe;
+  --text-primary: #172554;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 10px rgba(15, 23, 42, 0.07);
+  --shadow-lg: 0 10px 25px rgba(37, 99, 235, 0.1);
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--light-grey);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--dark-navy);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Navbar */
+.navbar-campus {
+  background-color: var(--dark-navy) !important;
+  border-bottom: 2px solid var(--accent-orange);
+}
+
+.navbar-brand-logo {
+  background: linear-gradient(135deg, var(--primary-blue), var(--accent-orange));
+  color: white;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Hero Section */
+.hero-campus {
+  background: linear-gradient(135deg, #172554 0%, #1e3a8a 60%, #2563eb 100%);
+  color: #ffffff;
+  padding: 4.5rem 1rem 3.5rem;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-campus::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: rgba(249, 115, 22, 0.12);
+  filter: blur(40px);
+}
+
+/* Custom Buttons */
+.btn-primary-blue {
+  background-color: var(--primary-blue);
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.btn-primary-blue:hover {
+  background-color: var(--primary-blue-hover);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+.btn-accent-orange {
+  background-color: var(--accent-orange);
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.btn-accent-orange:hover {
+  background-color: var(--accent-orange-hover);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+}
+
+.btn-soft-blue {
+  background-color: var(--soft-blue);
+  color: var(--primary-blue);
+  font-weight: 600;
+  border: 1px solid var(--soft-blue-border);
+  border-radius: var(--radius-sm);
+}
+
+.btn-soft-blue:hover {
+  background-color: #bfdbfe;
+  color: var(--dark-navy);
+}
+
+/* Card Styling */
+.card-campus {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-campus:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.card-soft-blue {
+  background-color: #f8faff;
+  border: 1px solid var(--soft-blue-border);
+  border-radius: var(--radius-md);
+}
+
+/* Status Badges */
+.badge-status-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+  font-weight: 600;
+  border: 1px solid #fde68a;
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+}
+
+.badge-status-accepted, .badge-status-scheduled, .badge-status-verified, .badge-status-resolved {
+  background-color: #dcfce7;
+  color: #166534;
+  font-weight: 600;
+  border: 1px solid #bbf7d0;
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+}
+
+.badge-status-rejected, .badge-status-cancelled, .badge-status-suspended {
+  background-color: #fee2e2;
+  color: #991b1b;
+  font-weight: 600;
+  border: 1px solid #fecaca;
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+}
+
+.badge-status-ongoing {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-weight: 600;
+  border: 1px solid #bae6fd;
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+}
+
+.badge-vehicle-bus {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  color: #ffffff;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+  letter-spacing: 0.5px;
+}
+
+.badge-vehicle-car {
+  background-color: #e2e8f0;
+  color: #334155;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 0.3rem 0.65rem;
+}
+
+/* Route visualization node */
+.route-node {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.route-node::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: var(--primary-blue);
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px var(--primary-blue);
+}
+
+.route-node.destination::before {
+  background-color: var(--accent-orange);
+  box-shadow: 0 0 0 2px var(--accent-orange);
+}
+
+.route-node:not(.destination)::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 18px;
+  bottom: -15px;
+  width: 2px;
+  background-color: #cbd5e1;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: white;
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+/* Admin Sidebar & Content Layout */
+.admin-nav-link {
+  color: #475569;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.admin-nav-link:hover, .admin-nav-link.active {
+  background-color: var(--soft-blue);
+  color: var(--primary-blue);
+}
+
+/* Notification Item */
+.notif-item {
+  border-left: 4px solid #cbd5e1;
+  transition: all 0.15s ease;
+}
+
+.notif-item.unread {
+  border-left-color: var(--accent-orange);
+  background-color: #fffaf5;
+}
+
+.notif-item:hover {
+  background-color: #f8fafc;
+}
+
+/* Footer */
+footer {
+  background-color: var(--dark-navy);
+  color: #94a3b8;
+  padding: 3rem 0 1.5rem;
+  border-top: 1px solid #1e293b;
+}
+
+footer a {
+  color: #cbd5e1;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--accent-orange);
+}

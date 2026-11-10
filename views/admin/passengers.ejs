@@ -1,0 +1,89 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">User Administration</span>
+        <h2 class="fw-extrabold text-white mb-0">Manage Passengers</h2>
+        <small class="text-light text-opacity-75">
+          Sherubtse College Student and Staff Accounts Registry
+        </small>
+      </div>
+
+      <div>
+        <a href="/admin" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-arrow-left me-1"></i> Admin Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold text-navy mb-0"><i class="fa-solid fa-users text-primary me-2"></i> Registered Passengers (<%= passengers.length %>)</h5>
+    </div>
+
+    <% if (passengers && passengers.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">User ID</th>
+              <th>Full Name</th>
+              <th>Classification</th>
+              <th>College Email</th>
+              <th>Phone</th>
+              <th>Account Status</th>
+              <th class="pe-4 text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% passengers.forEach(function(u) { %>
+              <tr>
+                <td class="ps-4 fw-bold text-navy">#<%= u.user_id %></td>
+                <td>
+                  <strong><%= u.full_name %></strong>
+                </td>
+                <td>
+                  <% if (u.passenger_type === 'staff') { %>
+                    <span class="badge bg-primary text-white"><i class="fa-solid fa-briefcase me-1"></i> Faculty / Staff</span>
+                  <% } else { %>
+                    <span class="badge bg-info-subtle text-info fw-bold"><i class="fa-solid fa-graduation-cap me-1"></i> Student</span>
+                  <% } %>
+                </td>
+                <td><%= u.email %></td>
+                <td><%= u.phone %></td>
+                <td>
+                  <% if (u.status === 'active') { %>
+                    <span class="badge bg-success text-white">Active</span>
+                  <% } else { %>
+                    <span class="badge bg-danger text-white">Suspended</span>
+                  <% } %>
+                </td>
+                <td class="pe-4 text-end">
+                  <form action="/admin/passengers/<%= u.user_id %>/toggle" method="POST" class="d-inline">
+                    <button type="submit" class="btn <%= u.status === 'active' ? 'btn-outline-danger' : 'btn-outline-success' %> btn-sm rounded-pill px-3">
+                      <%= u.status === 'active' ? 'Suspend Account' : 'Activate Account' %>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5 text-muted">
+        <p class="mb-0">No passengers registered yet.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,130 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <!-- Verification Warning if Driver is not verified yet -->
+      <% if (!isVerified && currentUser.role !== 'admin') { %>
+        <div class="alert alert-warning border-0 shadow-sm d-flex align-items-center gap-3 mb-4 p-3">
+          <i class="fa-solid fa-clock-rotate-left fs-3 text-warning"></i>
+          <div>
+            <h6 class="fw-bold mb-1">Driver Verification Required</h6>
+            <p class="small mb-0">
+              Your driver account is currently pending verification by campus administration. You need an approved vehicle and driver license to publish public trips.
+            </p>
+          </div>
+          <a href="/profile" class="btn btn-warning btn-sm text-dark fw-bold text-nowrap ms-auto">
+            Go to Profile
+          </a>
+        </div>
+      <% } %>
+
+      <div class="card card-campus border-0 shadow-lg p-4 p-md-5 bg-white">
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="navbar-brand-logo" style="width: 48px; height: 48px; font-size: 1.3rem;">
+            <i class="fa-solid fa-plus-circle"></i>
+          </div>
+          <div>
+            <h3 class="fw-extrabold text-dark mb-0">Offer a Campus Ride</h3>
+            <p class="text-muted small mb-0">Publish an upcoming private vehicle ride or official Campus Bus trip</p>
+          </div>
+        </div>
+
+        <form action="/trips/offer" method="POST" id="offerTripForm">
+          
+          <!-- Route Section -->
+          <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2" style="letter-spacing: 0.5px;">
+            <i class="fa-solid fa-route text-primary me-1"></i> 1. Route Information
+          </h6>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="startingLocation" class="form-label fw-bold small text-dark">Starting Location *</label>
+              <input type="text" class="form-control" id="startingLocation" name="startingLocation" required placeholder="e.g. Trashigang Town Taxi Stand">
+            </div>
+            <div class="col-md-6">
+              <label for="destination" class="form-label fw-bold small text-dark">Destination *</label>
+              <input type="text" class="form-control" id="destination" name="destination" required placeholder="e.g. Kanglung (Sherubtse Campus)">
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="pickupLocation" class="form-label fw-bold small text-dark">Precise Pickup Location / Landmark *</label>
+            <input type="text" class="form-control" id="pickupLocation" name="pickupLocation" required placeholder="e.g. Near Dzong Junction / Main Gate Bus Shelter">
+            <small class="text-muted" style="font-size: 0.75rem;">Give clear pickup directions where passengers can easily locate you.</small>
+          </div>
+
+          <!-- Schedule & Vehicle Section -->
+          <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2" style="letter-spacing: 0.5px;">
+            <i class="fa-solid fa-calendar-days text-primary me-1"></i> 2. Schedule & Vehicle Details
+          </h6>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="travelDate" class="form-label fw-bold small text-dark">Travel Date *</label>
+              <input type="date" class="form-control" id="travelDate" name="travelDate" required min="<%= todayDate %>">
+            </div>
+            <div class="col-md-6">
+              <label for="departureTime" class="form-label fw-bold small text-dark">Departure Time *</label>
+              <input type="time" class="form-control" id="departureTime" name="departureTime" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <label for="availableSeats" class="form-label fw-bold small text-dark">Available Seats *</label>
+              <input type="number" class="form-control" id="availableSeats" name="availableSeats" required min="1" max="50" placeholder="e.g. 3">
+              <small class="text-muted" style="font-size: 0.75rem;">Must be > 0 and within vehicle limit.</small>
+            </div>
+
+            <div class="col-md-4">
+              <label for="fareOrContribution" class="form-label fw-bold small text-dark">Fare / Fuel Share (Nu.)</label>
+              <input type="number" step="0.5" class="form-control" id="fareOrContribution" name="fareOrContribution" placeholder="0 for free shuttle" value="0">
+              <small class="text-muted" style="font-size: 0.75rem;">Optional fuel contribution per passenger.</small>
+            </div>
+
+            <div class="col-md-4">
+              <label for="vehicleId" class="form-label fw-bold small text-dark">Select Vehicle</label>
+              <select class="form-select" id="vehicleId" name="vehicleId">
+                <% if (vehicles && vehicles.length > 0) { %>
+                  <% vehicles.forEach(v => { %>
+                    <option value="<%= v.vehicle_id %>">
+                      <%= v.vehicle_model %> (<%= v.vehicle_type %> - <%= v.registration_number %>)
+                    </option>
+                  <% }) %>
+                <% } else { %>
+                  <option value="">No registered vehicles (Standard)</option>
+                <% } %>
+              </select>
+              <small class="text-muted" style="font-size: 0.75rem;">
+                <a href="/profile" class="text-decoration-none">Add a new vehicle in profile</a>
+              </small>
+            </div>
+          </div>
+
+          <!-- Description Section -->
+          <h6 class="text-uppercase text-secondary fw-bold small mb-3 border-bottom pb-2" style="letter-spacing: 0.5px;">
+            <i class="fa-solid fa-circle-info text-primary me-1"></i> 3. Optional Trip Details & Rules
+          </h6>
+
+          <div class="mb-4">
+            <label for="tripDescription" class="form-label fw-bold small text-dark">Trip Notes / Luggage Allowance / Guidelines</label>
+            <textarea class="form-control" id="tripDescription" name="tripDescription" rows="3" placeholder="e.g. Travelling for morning lectures. Trunk space for 2 bags. No smoking."></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-accent-orange w-100 py-3 fw-bold shadow">
+            <i class="fa-solid fa-paper-plane me-1"></i> Publish Trip to Campus Community
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

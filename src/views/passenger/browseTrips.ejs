@@ -1,0 +1,167 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+  
+  <!-- Header & Filters -->
+  <div class="mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2">
+      <div>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Campus Shuttle Schedules</h1>
+        <p class="text-sm text-slate-500">Search and reserve seats on scheduled university transport</p>
+      </div>
+      <div class="text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200">
+        <i class="fa-solid fa-clock text-brand-600 mr-1"></i> Real-time Seat Availability
+      </div>
+    </div>
+
+    <!-- Filter Bar Card -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+      <form action="/trips" method="GET" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-1.5">Origin Stop</label>
+          <select name="origin" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <option value="">All Stops</option>
+            <% stops.forEach(stop => { %>
+              <option value="<%= stop.id %>" <%= filters.origin == stop.id ? 'selected' : '' %>><%= stop.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-1.5">Destination Stop</label>
+          <select name="destination" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <option value="">All Stops</option>
+            <% stops.forEach(stop => { %>
+              <option value="<%= stop.id %>" <%= filters.destination == stop.id ? 'selected' : '' %>><%= stop.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-1.5">Departure Date</label>
+          <input type="date" name="date" value="<%= filters.date %>"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+        </div>
+
+        <div class="flex items-end space-x-2">
+          <button type="submit" class="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl shadow-sm transition flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-filter"></i>
+            <span>Filter</span>
+          </button>
+          <a href="/trips" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-semibold transition" title="Clear Filters">
+            <i class="fa-solid fa-rotate-left"></i>
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Trips Results Grid -->
+  <% if (trips && trips.length > 0) { %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% trips.forEach(trip => { %>
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md hover:border-brand-300 transition-all flex flex-col justify-between overflow-hidden">
+          
+          <div class="p-5">
+            <!-- Header badge row -->
+            <div class="flex items-center justify-between mb-3">
+              <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-brand-50 text-brand-700 border border-brand-100">
+                <i class="fa-solid <%= trip.vehicle_type === 'Electric Cart' ? 'fa-bolt text-amber-500' : 'fa-van-shuttle' %> mr-1"></i>
+                <%= trip.vehicle_type %>
+              </span>
+
+              <% if (trip.available_seats === 0) { %>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700">FULL</span>
+              <% } else if (trip.available_seats <= 3) { %>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 animate-pulse">
+                  Only <%= trip.available_seats %> seats left!
+                </span>
+              <% } else { %>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  <%= trip.available_seats %> seats open
+                </span>
+              <% } %>
+            </div>
+
+            <!-- Route Name -->
+            <h3 class="text-base font-bold text-slate-900 mb-3"><%= trip.route_name %></h3>
+
+            <!-- Stops & Timeline -->
+            <div class="relative pl-6 space-y-4 mb-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+              <div class="relative">
+                <span class="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-brand-600 ring-4 ring-white"></span>
+                <span class="text-[11px] font-semibold uppercase text-slate-400">Departure</span>
+                <p class="text-xs font-bold text-slate-800"><%= trip.origin_stop_name %></p>
+                <p class="text-xs text-brand-700 font-semibold mt-0.5">
+                  <%= new Date(trip.departure_time).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) %> at 
+                  <%= new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                </p>
+              </div>
+
+              <div class="relative">
+                <span class="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-rose-600 ring-4 ring-white"></span>
+                <span class="text-[11px] font-semibold uppercase text-slate-400">Arrival</span>
+                <p class="text-xs font-bold text-slate-800"><%= trip.destination_stop_name %></p>
+                <p class="text-xs text-slate-500 font-medium mt-0.5">
+                  Est. <%= new Date(trip.arrival_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                  (~<%= trip.estimated_duration_min %> mins)
+                </p>
+              </div>
+            </div>
+
+            <!-- Vehicle & Driver info -->
+            <div class="bg-slate-50 rounded-xl p-2.5 text-xs text-slate-600 flex items-center justify-between">
+              <div>
+                <span class="font-semibold text-slate-700"><%= trip.vehicle_plate %></span>
+                <span class="text-slate-400 block text-[10px]"><%= trip.vehicle_model %></span>
+              </div>
+              <div class="text-right">
+                <span class="text-slate-500"><i class="fa-solid fa-id-badge mr-1"></i><%= trip.driver_name || 'Assigned Driver' %></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Action Bar -->
+          <div class="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-semibold uppercase text-slate-400 block">Fare</span>
+              <span class="text-base font-extrabold text-slate-900">
+                <%= parseFloat(trip.fare_amount) === 0 ? 'FREE' : '$' + parseFloat(trip.fare_amount).toFixed(2) %>
+              </span>
+            </div>
+
+            <% if (trip.available_seats > 0) { %>
+              <a href="/trips/<%= trip.id %>" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                <span>Book Seat</span>
+                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+              </a>
+            <% } else { %>
+              <button disabled class="px-4 py-2 bg-slate-200 text-slate-400 font-bold text-xs rounded-xl cursor-not-allowed">
+                Sold Out
+              </button>
+            <% } %>
+          </div>
+
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
+      <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl mx-auto mb-3">
+        <i class="fa-solid fa-van-shuttle"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 mb-1">No rides matching your search</h3>
+      <p class="text-xs text-slate-500 mb-4 max-w-sm mx-auto">
+        Try selecting a different date or remove origin/destination filters to view all upcoming shuttles.
+      </p>
+      <a href="/trips" class="inline-flex items-center px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs rounded-xl transition">
+        Reset All Filters
+      </a>
+    </div>
+  <% } %>
+
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,198 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+      <h2 class="fw-extrabold text-dark mb-1">My Ride Requests</h2>
+      <p class="text-muted small mb-0">Track seat requests, booking confirmations, and trip details</p>
+    </div>
+    <a href="/find-ride" class="btn btn-primary-blue fw-bold">
+      <i class="fa-solid fa-magnifying-glass me-1"></i> Find Another Ride
+    </a>
+  </div>
+
+  <!-- Tabs for Upcoming vs Past -->
+  <ul class="nav nav-pills mb-4" id="requestTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active fw-bold" id="active-tab" data-bs-toggle="pill" data-bs-target="#activeTabContent" type="button" role="tab">
+        <i class="fa-solid fa-clock text-warning me-1"></i> Active & Upcoming (<%= activeRequests.length %>)
+      </button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link fw-bold" id="past-tab" data-bs-toggle="pill" data-bs-target="#pastTabContent" type="button" role="tab">
+        <i class="fa-solid fa-history me-1"></i> Past & Historical (<%= pastRequests.length %>)
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content" id="requestTabsContent">
+    
+    <!-- Active & Upcoming Tab -->
+    <div class="tab-pane fade show active" id="activeTabContent" role="tabpanel">
+      <% if (activeRequests && activeRequests.length > 0) { %>
+        <div class="d-flex flex-column gap-3">
+          <% activeRequests.forEach(req => { %>
+            <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-3">
+                
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-2">
+                    <span class="<%= req.vehicle_type === 'Campus Bus' ? 'badge-vehicle-bus' : 'badge-vehicle-car' %>">
+                      <i class="fa-solid <%= req.vehicle_type === 'Campus Bus' ? 'fa-bus' : 'fa-car' %> me-1"></i>
+                      <%= req.vehicle_type %>
+                    </span>
+
+                    <% if (req.request_status === 'Pending') { %>
+                      <span class="badge badge-status-pending">
+                        <i class="fa-solid fa-hourglass-half me-1"></i> Pending Approval
+                      </span>
+                    <% } else if (req.request_status === 'Accepted') { %>
+                      <span class="badge badge-status-accepted">
+                        <i class="fa-solid fa-circle-check me-1"></i> Request Accepted
+                      </span>
+                    <% } else if (req.request_status === 'Rejected') { %>
+                      <span class="badge badge-status-rejected">
+                        <i class="fa-solid fa-circle-xmark me-1"></i> Declined
+                      </span>
+                    <% } else { %>
+                      <span class="badge badge-status-cancelled">
+                        <i class="fa-solid fa-ban me-1"></i> Cancelled
+                      </span>
+                    <% } %>
+
+                    <span class="badge bg-light text-dark border">
+                      <strong><%= req.seats_requested %> seat(s)</strong> requested
+                    </span>
+                  </div>
+
+                  <h5 class="fw-bold text-dark mb-1">
+                    <%= req.starting_location %> <i class="fa-solid fa-arrow-right text-primary mx-1"></i> <%= req.destination %>
+                  </h5>
+
+                  <div class="small text-muted mb-2">
+                    <i class="fa-solid fa-map-pin text-primary me-1"></i> <strong>Pickup Point:</strong> <%= req.pickup_location %>
+                  </div>
+
+                  <% if (req.pickup_note) { %>
+                    <div class="small text-secondary fst-italic">
+                      "Note to driver: <%= req.pickup_note %>"
+                    </div>
+                  <% } %>
+
+                  <% if (req.cancellation_reason) { %>
+                    <div class="small text-danger mt-1">
+                      Reason: <%= req.cancellation_reason %>
+                    </div>
+                  <% } %>
+                </div>
+
+                <!-- Schedule & Cost -->
+                <div class="text-md-end">
+                  <div class="fw-bold text-dark fs-6 mb-1">
+                    <i class="fa-regular fa-calendar me-1 text-primary"></i> <%= req.travel_date.toISOString().split('T')[0] %>
+                  </div>
+                  <div class="text-secondary small mb-2">
+                    <i class="fa-regular fa-clock me-1"></i> Departure: <%= req.departure_time.slice(0, 5) %>
+                  </div>
+                  <div class="fs-5 fw-bold text-primary">
+                    <%= req.fare_or_contribution > 0 ? `Nu. ${req.fare_or_contribution * req.seats_requested}` : 'Free Shuttle' %>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Driver Contact & Actions -->
+              <div class="pt-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2 small">
+                  <i class="fa-solid fa-user-circle fs-5 text-secondary"></i>
+                  <div>
+                    <span class="fw-bold text-dark"><%= req.driver_name %></span>
+                    <% if (req.request_status === 'Accepted') { %>
+                      <span class="text-muted ms-1">(<i class="fa-solid fa-phone me-1"></i><%= req.driver_phone %>)</span>
+                    <% } %>
+                  </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <a href="/trips/<%= req.trip_id %>" class="btn btn-outline-primary btn-sm fw-semibold">
+                    View Trip Details
+                  </a>
+
+                  <% if (req.request_status === 'Pending' || req.request_status === 'Accepted') { %>
+                    <form action="/requests/<%= req.request_id %>/cancel" method="POST" onsubmit="return confirm('Are you sure you want to cancel this request?');">
+                      <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="fa-solid fa-xmark me-1"></i> Cancel Request
+                      </button>
+                    </form>
+                  <% } %>
+                </div>
+              </div>
+
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="empty-state py-5 bg-white">
+          <i class="fa-solid fa-ticket empty-state-icon"></i>
+          <h5 class="fw-bold text-dark">No Active Ride Requests</h5>
+          <p class="text-muted small mb-4">You have not submitted any seat requests for upcoming departures.</p>
+          <a href="/find-ride" class="btn btn-primary-blue fw-bold">
+            <i class="fa-solid fa-magnifying-glass me-1"></i> Search Available Rides
+          </a>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Past Tab -->
+    <div class="tab-pane fade" id="pastTabContent" role="tabpanel">
+      <% if (pastRequests && pastRequests.length > 0) { %>
+        <div class="table-responsive bg-white rounded-3 shadow-sm border p-3">
+          <table class="table table-hover align-middle mb-0 small">
+            <thead class="table-light">
+              <tr>
+                <th>Route</th>
+                <th>Travel Date</th>
+                <th>Seats</th>
+                <th>Status</th>
+                <th>Driver</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% pastRequests.forEach(req => { %>
+                <tr>
+                  <td>
+                    <strong><%= req.starting_location %> ➔ <%= req.destination %></strong>
+                    <div class="text-muted" style="font-size: 0.75rem;"><%= req.vehicle_type %></div>
+                  </td>
+                  <td><%= req.travel_date.toISOString().split('T')[0] %></td>
+                  <td><%= req.seats_requested %></td>
+                  <td>
+                    <span class="badge <%= req.request_status === 'Accepted' ? 'badge-status-accepted' : 'badge-status-cancelled' %>">
+                      <%= req.request_status %>
+                    </span>
+                  </td>
+                  <td><%= req.driver_name %></td>
+                  <td>
+                    <a href="/trips/<%= req.trip_id %>" class="btn btn-sm btn-outline-secondary">
+                      Trip Details
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state py-4 bg-white">
+          <p class="text-muted small mb-0">No past ride requests found.</p>
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

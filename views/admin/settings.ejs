@@ -1,0 +1,77 @@
+<%- include('../partials/header') %>
+  <%- include('../partials/navbar') %>
+
+    <div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+      <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div>
+            <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">System Configuration</span>
+            <h2 class="fw-extrabold text-white mb-0">System Settings</h2>
+            <small class="text-light text-opacity-75">
+              Campus Ride Global Platform Parameters & Institutional Rules
+            </small>
+          </div>
+
+          <div>
+            <a href="/admin" class="btn btn-outline-light btn-sm rounded-pill px-3">
+              <i class="fa-solid fa-arrow-left me-1"></i> Admin Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container py-4">
+      <%- include('../partials/alerts') %>
+
+        <div class="row g-4">
+          <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+              <h5 class="fw-bold text-navy mb-4"><i class="fa-solid fa-sliders text-primary me-2"></i> Operational
+                Parameters</h5>
+
+              <div class="mb-3 p-3 bg-light rounded-3 border">
+                <label class="form-label fw-bold small text-navy d-block">Institution & Campus Name</label>
+                <input type="text" class="form-control" value="<%= systemInfo.collegeName %>" readonly>
+              </div>
+
+              <div class="mb-3 p-3 bg-light rounded-3 border">
+                <label class="form-label fw-bold small text-navy d-block">Origin Location Base</label>
+                <input type="text" class="form-control" value="<%= systemInfo.location %>" readonly>
+              </div>
+
+              <div class="mb-3 p-3 bg-light rounded-3 border">
+                <label class="form-label fw-bold small text-navy d-block">Weekday Campus Ride Fixed Rate</label>
+                <input type="text" class="form-control" value="<%= systemInfo.fixedWeekdayFare %>" readonly>
+                <small class="text-muted">Strictly fixed at Nu. 100 per ride between Hostel and Classroom.</small>
+              </div>
+
+              <div class="mb-3 p-3 bg-light rounded-3 border">
+                <label class="form-label fw-bold small text-navy d-block">Operating Schedule</label>
+                <input type="text" class="form-control" value="<%= systemInfo.operatingDays %>" readonly>
+              </div>
+
+              <div class="p-3 bg-light rounded-3 border">
+                <label class="form-label fw-bold small text-navy d-block">Payment Method System</label>
+                <input type="text" class="form-control" value="<%= systemInfo.paymentMode %>" readonly>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-light mb-4">
+              <h6 class="fw-bold text-navy mb-3"><i class="fa-solid fa-database text-warning me-2"></i> Database Engine
+              </h6>
+              <ul class="list-unstyled small text-muted mb-0">
+                <li class="py-2 border-bottom"><strong>Database:</strong> PostgreSQL</li>
+                <li class="py-2 border-bottom"><strong>Architecture:</strong> Model-View-Controller (MVC)</li>
+                <li class="py-2 border-bottom"><strong>Template Engine:</strong> EJS</li>
+                <li class="py-2 border-bottom"><strong>Authentication:</strong> Session & Bcrypt</li>
+                <li class="py-2"><strong>Dzongkhag Count:</strong> 20 Districts</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>

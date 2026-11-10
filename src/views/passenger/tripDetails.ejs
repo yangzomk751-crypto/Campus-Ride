@@ -1,0 +1,164 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
+  
+  <div class="mb-4">
+    <a href="/trips" class="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-brand-600 transition">
+      <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Schedules
+    </a>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    
+    <!-- Left 2 cols: Trip Itinerary & Vehicle Specs -->
+    <div class="md:col-span-2 space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
+        
+        <div class="flex items-center justify-between mb-4">
+          <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-md text-xs font-bold bg-brand-50 text-brand-700">
+            <i class="fa-solid fa-bus"></i>
+            <span><%= trip.vehicle_type %></span>
+          </span>
+          <span class="text-xs font-bold px-3 py-1 rounded-full <%= trip.status === 'BOARDING' ? 'bg-amber-100 text-amber-800 animate-pulse' : 'bg-emerald-100 text-emerald-800' %>">
+            Status: <%= trip.status %>
+          </span>
+        </div>
+
+        <h1 class="text-2xl font-extrabold text-slate-900 mb-4"><%= trip.route_name %></h1>
+
+        <!-- Stops Timeline -->
+        <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100 mb-6">
+          <div class="relative pl-8 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-brand-200">
+            
+            <div class="relative">
+              <span class="absolute -left-8 top-1 w-3.5 h-3.5 rounded-full bg-brand-600 ring-4 ring-white shadow-xs"></span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pickup Stop</span>
+              <h4 class="text-sm font-bold text-slate-900"><%= trip.origin_stop_name %> (<%= trip.origin_stop_code %>)</h4>
+              <p class="text-xs text-brand-700 font-semibold mt-0.5">
+                <%= new Date(trip.departure_time).toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }) %>
+                at <%= new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+              </p>
+            </div>
+
+            <div class="relative">
+              <span class="absolute -left-8 top-1 w-3.5 h-3.5 rounded-full bg-rose-600 ring-4 ring-white shadow-xs"></span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dropoff Stop</span>
+              <h4 class="text-sm font-bold text-slate-900"><%= trip.destination_stop_name %> (<%= trip.destination_stop_code %>)</h4>
+              <p class="text-xs text-slate-500 font-medium mt-0.5">
+                Estimated arrival at <%= new Date(trip.arrival_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                (~<%= trip.estimated_duration_min %> mins • <%= trip.distance_km %> km)
+              </p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Shuttle & Driver Details -->
+        <div class="grid grid-cols-2 gap-4 text-xs">
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-slate-400 font-medium block mb-1">Vehicle Info</span>
+            <p class="font-bold text-slate-800 text-sm"><%= trip.vehicle_plate %></p>
+            <p class="text-slate-500"><%= trip.vehicle_model %> (Max <%= trip.vehicle_capacity %> seats)</p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+            <span class="text-slate-400 font-medium block mb-1">Assigned Driver</span>
+            <p class="font-bold text-slate-800 text-sm"><%= trip.driver_name || 'Campus Transit Driver' %></p>
+            <p class="text-slate-500"><%= trip.driver_phone || 'Radio Contact: Transit Dispatch' %></p>
+          </div>
+        </div>
+
+        <% if (trip.notes) { %>
+          <div class="mt-4 p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl text-xs text-amber-800">
+            <i class="fa-solid fa-circle-info mr-1 text-amber-600"></i>
+            <span class="font-semibold">Notice:</span> <%= trip.notes %>
+          </div>
+        <% } %>
+
+      </div>
+    </div>
+
+    <!-- Right col: Seat Booking Card -->
+    <div>
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm sticky top-24">
+        <h3 class="text-base font-bold text-slate-900 mb-1">Reserve Your Seat</h3>
+        <p class="text-xs text-slate-500 mb-4">Instant digital pass issued upon booking</p>
+
+        <div class="bg-slate-50 rounded-xl p-3 mb-4 border border-slate-100 flex justify-between items-center text-xs">
+          <span class="text-slate-500">Available Seats:</span>
+          <span class="font-bold <%= trip.available_seats <= 3 ? 'text-amber-600' : 'text-emerald-600' %> text-sm">
+            <%= trip.available_seats %> seats
+          </span>
+        </div>
+
+        <% if (trip.available_seats > 0) { %>
+          <% if (currentUser) { %>
+            <form action="/trips/<%= trip.id %>/book" method="POST" class="space-y-4">
+              <div>
+                <label for="seatsBooked" class="block text-xs font-bold uppercase text-slate-600 tracking-wider mb-1.5">
+                  Number of Passengers
+                </label>
+                <select id="seatsBooked" name="seatsBooked" onchange="updateFare(this.value, <%= parseFloat(trip.fare_amount || 0) %>)"
+                  class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-brand-500 focus:outline-none">
+                  <% const maxSelect = Math.min(trip.available_seats, 5); %>
+                  <% for (let i = 1; i <= maxSelect; i++) { %>
+                    <option value="<%= i %>"><%= i %> <%= i === 1 ? 'Seat (You)' : 'Seats' %></option>
+                  <% } %>
+                </select>
+                <p class="text-[11px] text-slate-400 mt-1">Maximum 5 seats per reservation.</p>
+              </div>
+
+              <!-- Price breakdown -->
+              <div class="pt-3 border-t border-slate-100 flex justify-between items-baseline">
+                <span class="text-xs font-medium text-slate-500">Total Price:</span>
+                <span id="totalFareDisplay" class="text-xl font-extrabold text-slate-900">
+                  <%= parseFloat(trip.fare_amount) === 0 ? 'FREE' : '$' + parseFloat(trip.fare_amount).toFixed(2) %>
+                </span>
+              </div>
+
+              <button type="submit" class="w-full py-3 px-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-check"></i>
+                <span>Confirm Reservation</span>
+              </button>
+            </form>
+          <% } else { %>
+            <div class="text-center py-4 bg-slate-50 rounded-xl border border-slate-100">
+              <p class="text-xs text-slate-600 mb-3">Please sign in with your campus account to book this ride.</p>
+              <a href="/login" class="inline-block w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-sm transition">
+                Sign In to Reserve
+              </a>
+            </div>
+          <% } %>
+        <% } else { %>
+          <div class="text-center py-6 bg-rose-50 text-rose-800 rounded-xl border border-rose-200">
+            <i class="fa-solid fa-ban text-2xl mb-2 text-rose-500"></i>
+            <p class="text-xs font-bold">This shuttle is currently at full capacity.</p>
+            <p class="text-[11px] text-rose-600 mt-1">Check the schedule for alternative departure times.</p>
+          </div>
+        <% } %>
+
+        <div class="mt-4 pt-4 border-t border-slate-100 text-[11px] text-slate-400 space-y-1">
+          <p><i class="fa-solid fa-qrcode mr-1 text-slate-400"></i> QR Code boarding ticket generated</p>
+          <p><i class="fa-solid fa-rotate-left mr-1 text-slate-400"></i> Free cancellation prior to departure</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  function updateFare(seats, unitFare) {
+    const total = seats * unitFare;
+    const display = document.getElementById('totalFareDisplay');
+    if (total === 0) {
+      display.textContent = 'FREE';
+    } else {
+      display.textContent = '$' + total.toFixed(2);
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

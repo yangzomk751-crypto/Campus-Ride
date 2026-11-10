@@ -1,0 +1,181 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+  
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200 mb-2">
+        <i class="fa-solid fa-calendar-days"></i>
+        <span>Dispatch Management</span>
+      </div>
+      <h1 class="text-3xl font-black text-slate-900 tracking-tight">Trip Dispatch & Schedules</h1>
+      <p class="text-sm text-slate-500">Coordinate campus shuttle departures, drivers, and seat allotments</p>
+    </div>
+
+    <button onclick="document.getElementById('addTripModal').classList.remove('hidden')" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
+      <i class="fa-solid fa-plus"></i>
+      <span>Schedule New Trip</span>
+    </button>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs text-slate-600">
+        <thead class="bg-slate-100 text-slate-500 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-200">
+          <tr>
+            <th class="px-5 py-3">Route</th>
+            <th class="px-5 py-3">Vehicle</th>
+            <th class="px-5 py-3">Driver</th>
+            <th class="px-5 py-3">Departure</th>
+            <th class="px-5 py-3 text-center">Available / Total</th>
+            <th class="px-5 py-3">Fare</th>
+            <th class="px-5 py-3">Status</th>
+            <th class="px-5 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 font-medium">
+          <% trips.forEach(trip => { %>
+            <tr class="hover:bg-slate-50 transition">
+              <td class="px-5 py-3">
+                <span class="font-bold text-slate-900"><%= trip.route_name %></span>
+                <span class="text-[10px] text-slate-400 block"><%= trip.origin_stop_name %> ➔ <%= trip.destination_stop_name %></span>
+              </td>
+              <td class="px-5 py-3">
+                <span class="font-mono font-bold text-slate-800"><%= trip.vehicle_plate %></span>
+                <span class="text-[10px] text-slate-400 block"><%= trip.vehicle_type %></span>
+              </td>
+              <td class="px-5 py-3">
+                <span class="font-semibold text-slate-800"><%= trip.driver_name || 'Unassigned' %></span>
+              </td>
+              <td class="px-5 py-3">
+                <span class="font-bold text-brand-700">
+                  <%= new Date(trip.departure_time).toLocaleDateString([], { month: 'short', day: 'numeric' }) %> 
+                  <%= new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                </span>
+              </td>
+              <td class="px-5 py-3 text-center font-bold">
+                <span class="<%= trip.available_seats === 0 ? 'text-rose-600' : 'text-slate-800' %>">
+                  <%= trip.available_seats %>
+                </span>
+                <span class="text-slate-400 font-normal">/ <%= trip.vehicle_capacity %></span>
+              </td>
+              <td class="px-5 py-3 font-bold text-slate-900">
+                <%= parseFloat(trip.fare_amount) === 0 ? 'FREE' : '$' + parseFloat(trip.fare_amount).toFixed(2) %>
+              </td>
+              <td class="px-5 py-3">
+                <form action="/admin/trips/<%= trip.id %>/status" method="POST" class="inline">
+                  <select name="status" onchange="this.form.submit()" class="text-[10px] font-bold py-1 px-2 rounded-lg border border-slate-300 bg-white cursor-pointer focus:outline-none">
+                    <option value="SCHEDULED" <%= trip.status === 'SCHEDULED' ? 'selected' : '' %>>SCHEDULED</option>
+                    <option value="BOARDING" <%= trip.status === 'BOARDING' ? 'selected' : '' %>>BOARDING</option>
+                    <option value="IN_TRANSIT" <%= trip.status === 'IN_TRANSIT' ? 'selected' : '' %>>IN_TRANSIT</option>
+                    <option value="COMPLETED" <%= trip.status === 'COMPLETED' ? 'selected' : '' %>>COMPLETED</option>
+                    <option value="CANCELLED" <%= trip.status === 'CANCELLED' ? 'selected' : '' %>>CANCELLED</option>
+                  </select>
+                </form>
+              </td>
+              <td class="px-5 py-3 text-right">
+                <form action="/admin/trips/<%= trip.id %>/delete" method="POST" onsubmit="return confirm('Delete this scheduled trip?');" class="inline">
+                  <button type="submit" class="text-rose-600 hover:text-rose-800 font-bold p-1">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Trip Modal -->
+  <div id="addTripModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-base font-bold text-slate-900">Schedule New Shuttle Run</h3>
+        <button type="button" onclick="document.getElementById('addTripModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form action="/admin/trips" method="POST" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Campus Route *</label>
+          <select name="routeId" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+            <% routes.forEach(r => { %>
+              <option value="<%= r.id %>"><%= r.name %> (~<%= r.estimated_duration_min %> mins)</option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Vehicle *</label>
+            <select name="vehicleId" required class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <% vehicles.forEach(v => { %>
+                <option value="<%= v.id %>"><%= v.plate_number %> (<%= v.capacity %> seats)</option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Driver</label>
+            <select name="driverId" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+              <option value="">Unassigned</option>
+              <% drivers.forEach(d => { %>
+                <option value="<%= d.id %>"><%= d.full_name %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Departure Time *</label>
+            <input type="datetime-local" name="departureTime" required
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Arrival Time *</label>
+            <input type="datetime-local" name="arrivalTime" required
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Available Seats (Leave blank for vehicle max)</label>
+            <input type="number" name="availableSeats" placeholder="Default: vehicle max"
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Ticket Fare ($)</label>
+            <input type="number" step="0.5" name="fareAmount" value="0.00"
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Notes / Instructions</label>
+          <input type="text" name="notes" placeholder="e.g. Wheelchair accessible, exams express"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none">
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-2">
+          <button type="button" onclick="document.getElementById('addTripModal').classList.add('hidden')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl">
+            Cancel
+          </button>
+          <button type="submit" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-xs">
+            Dispatch Trip
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</main>
+
+<%- include('../partials/footer') %>

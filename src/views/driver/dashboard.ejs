@@ -1,0 +1,84 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+  
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+    <div>
+      <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 mb-2">
+        <i class="fa-solid fa-id-card-clip"></i>
+        <span>Driver Duty Console</span>
+      </div>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Assigned Shifts & Shuttles</h1>
+      <p class="text-sm text-slate-500">Welcome, <%= currentUser.name %>. Here are your scheduled shuttle runs.</p>
+    </div>
+  </div>
+
+  <% if (trips && trips.length > 0) { %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <% trips.forEach(trip => { %>
+        <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md transition flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-bold font-mono px-2.5 py-1 rounded-md bg-slate-100 text-slate-800">
+                <i class="fa-solid fa-van-shuttle mr-1 text-slate-500"></i> <%= trip.vehicle_plate %>
+              </span>
+
+              <% let statusBadge = 'bg-slate-100 text-slate-700'; %>
+              <% if (trip.status === 'BOARDING') statusBadge = 'bg-amber-100 text-amber-800 animate-pulse'; %>
+              <% if (trip.status === 'IN_TRANSIT') statusBadge = 'bg-blue-100 text-blue-800'; %>
+              <% if (trip.status === 'COMPLETED') statusBadge = 'bg-emerald-100 text-emerald-800'; %>
+              <% if (trip.status === 'CANCELLED') statusBadge = 'bg-rose-100 text-rose-800'; %>
+
+              <span class="text-xs font-bold px-3 py-1 rounded-full <%= statusBadge %>">
+                <%= trip.status %>
+              </span>
+            </div>
+
+            <h3 class="text-lg font-bold text-slate-900 mb-2"><%= trip.route_name %></h3>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1.5 mb-4">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Route Stops:</span>
+                <span class="font-semibold text-slate-700"><%= trip.origin_stop_name %> ➔ <%= trip.destination_stop_name %></span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Scheduled Departure:</span>
+                <span class="font-bold text-brand-700">
+                  <%= new Date(trip.departure_time).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) %> 
+                  at <%= new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                </span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Passengers Confirmed:</span>
+                <span class="font-bold text-slate-900">
+                  <%= trip.booked_passengers_count || 0 %> Bookings (<%= trip.vehicle_capacity - trip.available_seats %> / <%= trip.vehicle_capacity %> seats)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <span class="text-xs text-slate-500"><%= trip.vehicle_model %></span>
+            <a href="/driver/trips/<%= trip.id %>/manifest" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
+              <i class="fa-solid fa-clipboard-user"></i>
+              <span>Open Passenger Manifest</span>
+            </a>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8">
+      <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 text-2xl mx-auto mb-3">
+        <i class="fa-solid fa-mug-hot"></i>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 mb-1">No trips assigned</h3>
+      <p class="text-xs text-slate-500">You currently have no scheduled trips assigned by the transit coordinator.</p>
+    </div>
+  <% } %>
+
+</main>
+
+<%- include('../partials/footer') %>

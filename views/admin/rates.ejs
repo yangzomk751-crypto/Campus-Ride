@@ -1,0 +1,63 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h2 class="fw-extrabold text-dark mb-0">Official Fixed Travel Rates</h2>
+        <span class="badge bg-danger text-uppercase">Admin</span>
+      </div>
+      <p class="text-muted small mb-0">Standardized fares for campus taxis and approved institutional rates for class trip buses</p>
+    </div>
+    <a href="/admin" class="btn btn-outline-secondary btn-sm">
+      <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 small">
+        <thead class="table-light">
+          <tr>
+            <th>Rate ID</th>
+            <th>Service Type</th>
+            <th>Route / Purpose</th>
+            <th>Pickup Point</th>
+            <th>Destination</th>
+            <th>Standard Fare</th>
+            <th>Fare Structure</th>
+            <th>Estimated Duration</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (rates && rates.length > 0) { %>
+            <% rates.forEach(r => { %>
+              <tr>
+                <td><code>#RATE-<%= r.rate_id %></code></td>
+                <td>
+                  <span class="badge <%= r.service_type === 'Taxi' ? 'bg-warning text-dark' : 'bg-primary' %>">
+                    <%= r.service_type %>
+                  </span>
+                </td>
+                <td class="fw-bold text-dark"><%= r.route_name %></td>
+                <td><%= r.pickup_location %></td>
+                <td><%= r.destination %></td>
+                <td>
+                  <strong class="text-primary fs-6">
+                    <%= r.standard_fare > 0 ? `Nu. ${r.standard_fare}` : 'FREE' %>
+                  </strong>
+                </td>
+                <td><span class="text-muted"><%= r.fare_type %></span></td>
+                <td><i class="fa-regular fa-clock me-1 text-secondary"></i> <%= r.estimated_duration %></td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

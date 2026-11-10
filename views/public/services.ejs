@@ -1,0 +1,168 @@
+<%- include('../partials/header') %>
+  <%- include('../partials/navbar') %>
+
+    <div class="bg-navy py-5 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+      <div class="container py-3">
+        <div class="max-w-700">
+          <span class="badge bg-warning text-dark fw-bold mb-2 text-uppercase">Sherubtse Transit Catalog</span>
+          <h1 class="display-5 fw-extrabold text-white mb-2">Transportation Services</h1>
+          <p class="lead text-light text-opacity-90">
+            Transparent campus transportation options designed to serve individual students, staff members, and class
+            groups.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container py-5">
+      <div class="row g-5">
+        <!-- Service 1: Available Weekday Rides -->
+        <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white border-start border-5 border-warning">
+            <div class="row align-items-center g-4">
+              <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-secondary">Monday - Friday Only</span>
+                  <span class="badge bg-success">Fixed Fare: Nu. 100</span>
+                </div>
+                <h2 class="fw-bold text-navy mb-3">Available Weekday Rides (Hostel ⇄ Academic Block)</h2>
+                <p class="text-muted leading-relaxed mb-3">
+                  Designed specifically for regular, quick transit between student resident hostels (DH1-8, Yontenling, Rabtenling, etc.) and the Academic Block. Rather than waiting for infrequent transport or walking long uphill campus roads during harsh weather, students and staff can request an on-demand ride whenever required.
+                </p>
+                <div class="row g-2 mb-4">
+                  <div class="col-sm-6">
+                    <div class="p-3 rounded-3 bg-light border">
+                      <strong class="d-block text-navy mb-1"><i
+                          class="fa-solid fa-arrow-right-arrow-left text-warning me-2"></i> Authorized Routes</strong>
+                      <span class="small text-muted d-block">• Hostel to Academic Block</span>
+                      <span class="small text-muted d-block">• Academic Block to Hostel</span>
+                    </div>
+                  </div>
+                  <div class="col-sm-6">
+                    <div class="p-3 rounded-3 bg-light border">
+                      <strong class="d-block text-navy mb-1"><i class="fa-solid fa-clock text-warning me-2"></i>
+                        Operating Window</strong>
+                      <span class="small text-muted d-block">• Monday to Friday (No fixed schedule)</span>
+                      <span class="small text-muted d-block">• Real-time driver availability toggle</span>
+                    </div>
+                  </div>
+                </div>
+                <a href="/weekday-rides" class="btn btn-warning text-dark fw-bold px-4 rounded-pill">
+                  <i class="fa-solid fa-person-walking-luggage me-2"></i> View Available Drivers & Request
+                </a>
+              </div>
+              <div class="col-lg-4 text-center">
+                <div class="bg-warning bg-opacity-10 rounded-4 p-4 text-center border border-warning border-opacity-25">
+                  <i class="fa-solid fa-route text-warning display-3 mb-3"></i>
+                  <h5 class="fw-bold text-navy">Flat Campus Rate</h5>
+                  <div class="display-6 fw-extrabold text-navy my-2">Nu. 100</div>
+                  <p class="small text-muted mb-0">Per ride, regardless of hostel block</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service 2: Book a Taxi -->
+        <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white border-start border-5 border-primary">
+            <div class="row align-items-center g-4">
+              <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-dark">Book Now & Schedule</span>
+                  <span class="badge bg-info text-white">Whole Hire or Shared</span>
+                </div>
+                <h2 class="fw-bold text-navy mb-3">Book a Campus Taxi</h2>
+                <p class="text-muted leading-relaxed mb-3">
+                  For travel beyond regular campus classroom routes, including trips to Kanglung town, hospital visits,
+                  domestic airport transfers at Yonphula, or inter-district travel across Bhutan's 20 dzongkhags.
+                </p>
+                <div class="row g-3 mb-4">
+                  <div class="col-md-6">
+                    <h6 class="fw-bold text-navy mb-1"><i class="fa-solid fa-bolt text-primary me-2"></i> Book Now</h6>
+                    <p class="small text-muted">Immediate pickup. Request is broadcast to verified campus drivers. The
+                      first valid driver to accept receives the confirmed booking.</p>
+                  </div>
+                  <div class="col-md-6">
+                    <h6 class="fw-bold text-navy mb-1"><i class="fa-solid fa-calendar-days text-primary me-2"></i>
+                      Schedule for Later</h6>
+                    <p class="small text-muted">Plan departures in advance. System automatically checks driver and
+                      vehicle availability to prevent double-booking conflicts.</p>
+                  </div>
+                  <div class="col-md-6">
+                    <h6 class="fw-bold text-navy mb-1"><i class="fa-solid fa-users text-primary me-2"></i> Ride Sharing
+                      Support</h6>
+                    <p class="small text-muted">Opt to share the taxi with fellow students. System divides total fare
+                      transparently among passengers.</p>
+                  </div>
+                  <div class="col-md-6">
+                    <h6 class="fw-bold text-navy mb-1"><i class="fa-solid fa-comments-dollar text-primary me-2"></i>
+                      Custom Fare Quotation</h6>
+                    <p class="small text-muted">Heading to an unlisted destination? Submit a custom fare request. The
+                      Transport Admin will review and provide a fair quote.</p>
+                  </div>
+                </div>
+                <a href="/book-taxi" class="btn btn-primary fw-bold px-4 rounded-pill">
+                  <i class="fa-solid fa-taxi me-2"></i> Book a Taxi Now
+                </a>
+              </div>
+              <div class="col-lg-4 text-center">
+                <div class="bg-primary bg-opacity-10 rounded-4 p-4 text-center border border-primary border-opacity-25">
+                  <i class="fa-solid fa-car-side text-primary display-3 mb-3"></i>
+                  <h5 class="fw-bold text-navy">Verified Taxis</h5>
+                  <div class="fs-4 fw-bold text-primary my-2">1 - 4 Passengers</div>
+                  <p class="small text-muted mb-0">Transparent Dzongkhag rates</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Service 3: Request a Bus -->
+        <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white border-start border-5 border-info">
+            <div class="row align-items-center g-4">
+              <div class="col-lg-8">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-dark">Group Transport</span>
+                  <span class="badge bg-secondary">Admin Coordinated</span>
+                </div>
+                <h2 class="fw-bold text-navy mb-3">Book a Bus for Group Trips & Outings</h2>
+                <p class="text-muted leading-relaxed mb-3">
+                  Charter and passenger buses for groups of friends, weekend trips, picnics, vacations, excursions, and
+                  student travels. Bookings are coordinated with verified local bus operators and drivers to guarantee
+                  roadworthy vehicles, transparent group fares, and reliable scheduling.
+                </p>
+                <div class="p-3 bg-light rounded-3 border mb-4">
+                  <h6 class="fw-bold text-navy mb-2"><i class="fa-solid fa-list-check text-info me-2"></i> Step-by-Step
+                    Bus Reservation Process</h6>
+                  <ol class="small text-muted ps-3 mb-0">
+                    <li class="mb-1"><strong>Submit Request:</strong> Passenger submits trip date, passenger count
+                      (5-60), destination, and trip purpose (friends trip, excursion, etc.).</li>
+                    <li class="mb-1"><strong>Review & Fare Quotation:</strong> The coordinator checks bus availability
+                      with verified operators and provides a competitive fare quotation.</li>
+                    <li class="mb-1"><strong>Passenger Acceptance:</strong> Review and Accept or Decline the quotation
+                      with your group.</li>
+                    <li class="mb-1"><strong>Bus & Driver Assignment:</strong> A verified bus and commercial heavy
+                      vehicle driver are assigned. Booking becomes <em>Confirmed</em>.</li>
+                  </ol>
+                </div>
+                <a href="/book-bus" class="btn btn-info text-white fw-bold px-4 rounded-pill">
+                  <i class="fa-solid fa-bus me-2"></i> Request Group Bus
+                </a>
+              </div>
+              <div class="col-lg-4 text-center">
+                <div class="bg-info bg-opacity-10 rounded-4 p-4 text-center border border-info border-opacity-25">
+                  <i class="fa-solid fa-van-shuttle text-info display-3 mb-3"></i>
+                  <h5 class="fw-bold text-navy">Group & Tour Buses</h5>
+                  <div class="fs-4 fw-bold text-info my-2">Up to 60 Pax</div>
+                  <p class="small text-muted mb-0">Verified commercial charter & passenger buses</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('../partials/footer') %>

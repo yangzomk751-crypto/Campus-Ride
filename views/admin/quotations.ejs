@@ -1,0 +1,156 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">Tariff Assessment</span>
+        <h2 class="fw-extrabold text-white mb-0">Custom Fare Quotations</h2>
+        <small class="text-light text-opacity-75">
+          Review unlisted destination requests and class bus trip proposals to provide official quotations.
+        </small>
+      </div>
+
+      <div>
+        <a href="/admin" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-arrow-left me-1"></i> Admin Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold text-navy mb-0">
+        <i class="fa-solid fa-file-invoice-dollar text-warning me-2"></i> Quotation Requests (<%= requests.length %>)
+      </h5>
+    </div>
+
+    <% if (requests && requests.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Ref #</th>
+              <th>Passenger</th>
+              <th>Service</th>
+              <th>Destination</th>
+              <th>Pickup</th>
+              <th>Date & Pax</th>
+              <th>Quotation Status</th>
+              <th>Quoted Fare</th>
+              <th class="pe-4 text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% requests.forEach(function(r) { %>
+              <tr>
+                <td class="ps-4 fw-bold text-navy">#<%= r.booking_id %></td>
+                <td>
+                  <strong><%= r.passenger_name %></strong>
+                  <small class="text-muted d-block"><%= r.passenger_phone %></small>
+                </td>
+                <td>
+                  <span class="badge <%= r.service_type === 'Bus' ? 'bg-info text-white' : 'bg-primary' %>">
+                    <%= r.service_type %>
+                  </span>
+                </td>
+                <td>
+                  <strong class="text-navy"><%= r.destination %></strong>
+                  <% if (r.trip_purpose) { %>
+                    <small class="text-muted d-block text-truncate" style="max-width: 200px;"><%= r.trip_purpose %></small>
+                  <% } %>
+                </td>
+                <td><%= r.pickup_location %></td>
+                <td>
+                  <small class="text-muted"><%= r.travel_date %> • <%= r.passenger_count %> Pax</small>
+                </td>
+                <td>
+                  <% if (r.quotation_status === 'Pending Admin Quotation') { %>
+                    <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-start me-1"></i> Awaiting Quote</span>
+                  <% } else if (r.quotation_status === 'Quoted') { %>
+                    <span class="badge bg-primary text-white"><i class="fa-solid fa-paper-plane me-1"></i> Quoted</span>
+                  <% } else if (r.quotation_status === 'Accepted') { %>
+                    <span class="badge bg-success text-white"><i class="fa-solid fa-check me-1"></i> Accepted</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Declined</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if (r.quoted_fare) { %>
+                    <strong class="text-success fs-6">Nu. <%= parseFloat(r.quoted_fare).toLocaleString() %></strong>
+                  <% } else { %>
+                    <span class="text-muted small">Not Quoted Yet</span>
+                  <% } %>
+                </td>
+                <td class="pe-4 text-end">
+                  <button type="button" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#quoteModal_<%= r.booking_id %>">
+                    <%= r.quoted_fare ? 'Revise Quote' : 'Provide Quote' %>
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Modal to Provide Quotation -->
+              <div class="modal fade" id="quoteModal_<%= r.booking_id %>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-navy text-white">
+                      <h5 class="modal-title fw-bold">
+                        <i class="fa-solid fa-hand-holding-dollar text-warning me-2"></i>Provide Quotation for #<%= r.booking_id %>
+                      </h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/admin/quotations/<%= r.booking_id %>/quote" method="POST">
+                      <div class="modal-body p-4 text-start">
+                        <div class="p-3 bg-light rounded-3 border mb-3 small">
+                          <strong class="d-block text-navy">Route: <%= r.pickup_location %> → <%= r.destination %></strong>
+                          <span>Service: <%= r.service_type %> • Passengers: <%= r.passenger_count %> Pax • Date: <%= r.travel_date %></span>
+                          <% if (r.trip_purpose) { %>
+                            <div class="text-muted mt-1"><strong>Purpose:</strong> <%= r.trip_purpose %></div>
+                          <% } %>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label fw-bold small text-navy">Quoted Total Fare (Nu.) *</label>
+                          <div class="input-group">
+                            <span class="input-group-text bg-light fw-bold">Nu.</span>
+                            <input type="number" step="10" name="quotedFare" class="form-control" required placeholder="e.g. 1500" value="<%= r.quoted_fare || '' %>">
+                          </div>
+                          <small class="text-muted">This fare will be submitted to the passenger for approval.</small>
+                        </div>
+
+                        <div class="mb-3">
+                          <label class="form-label fw-bold small text-navy">Administrative Remarks / Notes</label>
+                          <textarea name="adminNotes" class="form-control" rows="2" placeholder="e.g. Calculated based on regional highway fuel index and round-trip allowance"><%= r.admin_notes || '' %></textarea>
+                        </div>
+                      </div>
+                      <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning text-dark fw-bold btn-sm rounded-pill px-3">
+                          Submit Quotation to Passenger
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5 text-muted">
+        <i class="fa-solid fa-file-circle-check fs-1 opacity-50 mb-3"></i>
+        <h6 class="fw-bold text-navy">No pending quotation requests</h6>
+        <p class="small mb-0">Unlisted destination taxi requests and class bus trip inquiries will appear here.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

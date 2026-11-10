@@ -1,0 +1,274 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-warning text-dark fw-bold text-uppercase">Booking #<%= booking.booking_id %></span>
+          <span class="badge bg-secondary"><%= booking.service_type %></span>
+          <% if (booking.booking_status === 'Confirmed') { %>
+            <span class="badge bg-primary text-white"><i class="fa-solid fa-check me-1"></i> Confirmed</span>
+          <% } else if (booking.booking_status === 'In Progress') { %>
+            <span class="badge bg-info text-dark"><i class="fa-solid fa-spinner fa-spin me-1"></i> In Progress</span>
+          <% } else if (booking.booking_status === 'Completed') { %>
+            <span class="badge bg-success text-white"><i class="fa-solid fa-flag-checkered me-1"></i> Completed</span>
+          <% } else if (booking.booking_status === 'Cancelled' || booking.booking_status === 'Rejected') { %>
+            <span class="badge bg-danger text-white"><i class="fa-solid fa-xmark me-1"></i> <%= booking.booking_status %></span>
+          <% } else { %>
+            <span class="badge bg-warning text-dark"><i class="fa-solid fa-hourglass-start me-1"></i> Pending</span>
+          <% } %>
+        </div>
+        <h2 class="fw-extrabold text-white mb-0"><%= booking.destination %></h2>
+        <small class="text-light text-opacity-75">
+          Pickup: <%= booking.pickup_location %> • Scheduled for <%= booking.travel_date %> at <%= booking.departure_time %>
+        </small>
+      </div>
+
+      <div>
+        <a href="/my-bookings" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-arrow-left me-1"></i> Back to My Bookings
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <!-- Quotation Action Banner (If Quoted by Admin) -->
+  <% if (booking.quotation_status === 'Quoted' && isOwner) { %>
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-5 border-danger mb-4">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div>
+          <span class="badge bg-danger text-white mb-1"><i class="fa-solid fa-bell me-1"></i> Official Quotation Received</span>
+          <h4 class="fw-bold text-navy mb-1">Quoted Fare: Nu. <%= parseFloat(booking.quoted_fare).toLocaleString() %></h4>
+          <p class="small text-muted mb-0">
+            <% if (booking.admin_notes) { %>
+              <strong>Admin Notes:</strong> "<%= booking.admin_notes %>" •
+            <% } %>
+            Please review the fare and accept or decline to proceed with vehicle and driver confirmation.
+          </p>
+        </div>
+
+        <div class="d-flex gap-2">
+          <form action="/bookings/<%= booking.booking_id %>/accept-quote" method="POST">
+            <button type="submit" class="btn btn-success fw-bold px-4 rounded-pill shadow-sm">
+              <i class="fa-solid fa-check me-1"></i> Accept Quotation
+            </button>
+          </form>
+          <form action="/bookings/<%= booking.booking_id %>/decline-quote" method="POST" onsubmit="return confirm('Are you sure you want to decline this quotation? The booking will be cancelled.');">
+            <button type="submit" class="btn btn-outline-danger fw-semibold px-3 rounded-pill">
+              <i class="fa-solid fa-xmark me-1"></i> Decline
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  <% } %>
+
+  <div class="row g-4">
+    <!-- Journey & Booking Specifics -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
+        <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-route text-primary me-2"></i> Trip Information</h5>
+
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6">
+            <div class="p-3 bg-light rounded-3 border">
+              <small class="text-muted text-uppercase fw-semibold d-block">Origin / Pickup Spot</small>
+              <strong class="text-navy fs-6"><%= booking.pickup_location %></strong>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-3 bg-light rounded-3 border">
+              <small class="text-muted text-uppercase fw-semibold d-block">Destination</small>
+              <strong class="text-navy fs-6"><%= booking.destination %></strong>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="p-3 bg-light rounded-3 border">
+              <small class="text-muted text-uppercase fw-semibold d-block">Travel Date</small>
+              <strong class="text-navy"><%= booking.travel_date %></strong>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="p-3 bg-light rounded-3 border">
+              <small class="text-muted text-uppercase fw-semibold d-block">Departure Time</small>
+              <strong class="text-navy"><%= booking.departure_time %></strong>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="p-3 bg-light rounded-3 border">
+              <small class="text-muted text-uppercase fw-semibold d-block">Passenger Count</small>
+              <strong class="text-navy"><%= booking.passenger_count %> Pax <%= booking.ride_sharing_opted ? '(Shared Taxi)' : '' %></strong>
+            </div>
+          </div>
+        </div>
+
+        <% if (booking.trip_purpose) { %>
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-navy">Purpose of Travel</label>
+            <p class="text-muted small p-3 bg-light rounded-3 border mb-0"><%= booking.trip_purpose %></p>
+          </div>
+        <% } %>
+
+        <% if (booking.remarks) { %>
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-navy">Additional Remarks</label>
+            <p class="text-muted small p-3 bg-light rounded-3 border mb-0"><%= booking.remarks %></p>
+          </div>
+        <% } %>
+
+        <% if (booking.rejection_reason) { %>
+          <div class="alert alert-danger py-2 small mb-3">
+            <strong>Cancellation / Rejection Reason:</strong> <%= booking.rejection_reason %>
+          </div>
+        <% } %>
+
+        <!-- Assigned Vehicle & Driver Info -->
+        <h5 class="fw-bold text-navy mt-4 mb-3"><i class="fa-solid fa-id-card text-success me-2"></i> Assigned Transportation Provider</h5>
+        <% if (booking.driver_name) { %>
+          <div class="card border rounded-3 p-3 bg-light">
+            <div class="row g-3 align-items-center">
+              <div class="col-md-6">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px;">
+                    <%= booking.driver_name.charAt(0) %>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold text-navy mb-0"><%= booking.driver_name %></h6>
+                    <small class="text-muted d-block"><i class="fa-solid fa-phone me-1"></i> <%= booking.driver_phone %></small>
+                    <small class="text-muted"><i class="fa-solid fa-id-card me-1"></i> License: <%= booking.driver_license || 'Verified' %></small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <% if (booking.registration_number) { %>
+                  <div class="p-2 bg-white rounded border">
+                    <small class="text-muted d-block">Vehicle Assigned</small>
+                    <strong class="text-dark"><%= booking.vehicle_model %> (<%= booking.registration_number %>)</strong>
+                    <small class="text-muted d-block">Type: <%= booking.vehicle_type %> • Capacity: <%= booking.vehicle_capacity %> Pax</small>
+                  </div>
+                <% } else { %>
+                  <span class="badge bg-secondary">Vehicle details pending</span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="alert alert-light border py-3 small text-muted">
+            <i class="fa-solid fa-circle-notch fa-spin me-2 text-warning"></i> Driver and vehicle allocation is currently being arranged. You will receive an immediate notification once confirmed.
+          </div>
+        <% } %>
+
+        <!-- Passenger Cancellation Option -->
+        <% if (isOwner && ['Pending', 'Confirmed'].includes(booking.booking_status)) { %>
+          <hr class="my-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong class="text-danger small d-block">Need to cancel this booking?</strong>
+              <small class="text-muted">You can cancel your booking prior to the journey starting.</small>
+            </div>
+            <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#cancelBookingModal">
+              <i class="fa-solid fa-ban me-1"></i> Cancel Booking
+            </button>
+          </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Fare & Cash Payment Status Sidebar -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 80px;">
+        <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-wallet text-warning me-2"></i> Fare & Payment Summary</h5>
+
+        <div class="p-3 bg-light rounded-3 border mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small">Service Type:</span>
+            <strong><%= booking.service_type %></strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small">Booking Mode:</span>
+            <strong><%= booking.booking_subtype || 'Standard' %></strong>
+          </div>
+          <% if (booking.ride_sharing_opted) { %>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-success small fw-bold">Fare / Pax (Shared):</span>
+              <strong class="text-success">Nu. <%= parseFloat(booking.fare_per_passenger || 0).toLocaleString() %></strong>
+            </div>
+          <% } %>
+          <hr class="my-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="text-navy fw-bold">Agreed Total Fare:</span>
+            <span class="fs-4 fw-extrabold text-navy">
+              Nu. <%= parseFloat(booking.total_fare || 0).toLocaleString() %>
+            </span>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-3 border mb-3 <%= booking.payment_status === 'Paid' ? 'bg-success-subtle border-success' : (booking.payment_status === 'Waived' ? 'bg-info-subtle border-info' : 'bg-warning-subtle border-warning') %>">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Payment Status</small>
+              <strong class="fs-6 <%= booking.payment_status === 'Paid' ? 'text-success' : (booking.payment_status === 'Waived' ? 'text-info' : 'text-warning text-dark') %>">
+                <i class="fa-solid <%= booking.payment_status === 'Paid' ? 'fa-circle-check' : (booking.payment_status === 'Waived' ? 'fa-award' : 'fa-hourglass-half') %> me-1"></i>
+                <%= booking.payment_status || 'Pending' %>
+              </strong>
+            </div>
+            <span class="badge bg-dark">Cash Mode</span>
+          </div>
+          <% if (booking.payment_status === 'Pending') { %>
+            <small class="text-muted d-block mt-2">
+              Payment is made in cash directly to the driver upon completion of your journey.
+            </small>
+          <% } else if (booking.payment_status === 'Paid') { %>
+            <small class="text-success d-block mt-2">
+              Payment confirmed received by driver on <%= booking.paid_at ? new Date(booking.paid_at).toLocaleDateString() : 'Arrival' %>.
+            </small>
+          <% } else if (booking.payment_status === 'Waived') { %>
+            <small class="text-info d-block mt-2">
+              Official institutional trip. Payment waived by the Transport Administration.
+            </small>
+          <% } %>
+        </div>
+
+        <div class="alert alert-light border py-2 small text-muted mb-0">
+          <i class="fa-solid fa-lock text-primary me-1"></i> <strong>Fare Snapshot:</strong> The agreed fare is permanently recorded with your booking and is protected against future tariff alterations.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Booking Modal -->
+<% if (isOwner && ['Pending', 'Confirmed'].includes(booking.booking_status)) { %>
+  <div class="modal fade" id="cancelBookingModal" tabindex="-1" aria-labelledby="cancelBookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title fw-bold" id="cancelBookingModalLabel"><i class="fa-solid fa-triangle-exclamation me-2"></i>Confirm Cancellation</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="/bookings/<%= booking.booking_id %>/cancel" method="POST">
+          <div class="modal-body p-4">
+            <p class="text-muted small">Are you sure you want to cancel Booking #<%= booking.booking_id %> to <strong><%= booking.destination %></strong>?</p>
+            <div class="mb-3">
+              <label for="cancellationReason" class="form-label fw-bold small text-navy">Reason for Cancellation</label>
+              <textarea class="form-control" id="cancellationReason" name="cancellationReason" rows="3" required placeholder="e.g. Schedule change, alternative travel arrangement..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer bg-light">
+            <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Keep Booking</button>
+            <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold">Confirm Cancellation</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<%- include('../partials/footer') %>

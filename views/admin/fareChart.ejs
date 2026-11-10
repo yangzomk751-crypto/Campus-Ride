@@ -1,0 +1,173 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">Tariff Control</span>
+        <h2 class="fw-extrabold text-white mb-0">Fare Chart Management (All 20 Dzongkhags)</h2>
+        <small class="text-light text-opacity-75">
+          Official transport rates originating from Sherubtse College, Kanglung, Bhutan.
+        </small>
+      </div>
+
+      <div>
+        <button type="button" class="btn btn-warning btn-sm text-dark fw-bold rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addFareRateModal">
+          <i class="fa-solid fa-plus me-1"></i> Add Destination Rate
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white mb-4">
+    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+      <h5 class="fw-bold text-navy mb-0">
+        <i class="fa-solid fa-tags text-primary me-2"></i> Active Tariff Schedule (<%= rates.length %> Destinations)
+      </h5>
+      <span class="text-muted small">Server-side authoritative pricing</span>
+    </div>
+
+    <% if (rates && rates.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">Destination / Route</th>
+              <th>Bus Fare (Nu. / Pax)</th>
+              <th>Taxi Fare (Nu. / Hire)</th>
+              <th>Shared (4 Pax Est.)</th>
+              <th>Status</th>
+              <th>Notes / Remarks</th>
+              <th class="pe-4 text-end">Manage Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rates.forEach(function(r) { 
+                 const busFare = parseFloat(r.bus_fare);
+                 const taxiFare = parseFloat(r.taxi_fare);
+                 const sharedFare = Math.round((taxiFare / 4) * 100) / 100;
+            %>
+              <tr>
+                <td class="ps-4">
+                  <strong class="text-navy"><%= r.destination %></strong>
+                </td>
+                <td>
+                  <span class="fs-6 fw-bold text-info">Nu. <%= busFare.toLocaleString() %></span>
+                </td>
+                <td>
+                  <span class="fs-6 fw-bold text-navy">Nu. <%= taxiFare.toLocaleString() %></span>
+                </td>
+                <td>
+                  <span class="badge bg-success-subtle text-success fw-bold">Nu. <%= sharedFare.toLocaleString() %></span>
+                </td>
+                <td>
+                  <% if (r.is_active) { %>
+                    <span class="badge bg-success text-white">Active</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary text-white">Inactive</span>
+                  <% } %>
+                </td>
+                <td>
+                  <small class="text-muted"><%= r.notes || '—' %></small>
+                </td>
+                <td class="pe-4 text-end">
+                  <div class="d-inline-flex gap-1">
+                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-2" data-bs-toggle="modal" data-bs-target="#editRateModal_<%= r.rate_id %>">
+                      Edit
+                    </button>
+                    <form action="/admin/fare-chart/<%= r.rate_id %>/toggle" method="POST" class="d-inline">
+                      <button type="submit" class="btn <%= r.is_active ? 'btn-outline-secondary' : 'btn-outline-success' %> btn-sm rounded-pill px-2">
+                        <%= r.is_active ? 'Deactivate' : 'Activate' %>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Edit Rate Modal -->
+              <div class="modal fade" id="editRateModal_<%= r.rate_id %>" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content border-0 shadow">
+                    <div class="modal-header bg-navy text-white">
+                      <h5 class="modal-title fw-bold">
+                        <i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Edit Fares: <%= r.destination %>
+                      </h5>
+                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/admin/fare-chart/<%= r.rate_id %>/update" method="POST">
+                      <div class="modal-body p-4 text-start">
+                        <div class="mb-3">
+                          <label class="form-label fw-bold small text-navy">Bus Fare (Nu. per passenger) *</label>
+                          <input type="number" step="10" name="busFare" class="form-control" value="<%= r.bus_fare %>" required>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label fw-bold small text-navy">Taxi Fare (Nu. whole vehicle hire) *</label>
+                          <input type="number" step="10" name="taxiFare" class="form-control" value="<%= r.taxi_fare %>" required>
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label fw-bold small text-navy">Remarks / Notes</label>
+                          <input type="text" name="notes" class="form-control" value="<%= r.notes || '' %>">
+                        </div>
+                      </div>
+                      <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">Update Fares</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<!-- Add Fare Rate Modal -->
+<div class="modal fade" id="addFareRateModal" tabindex="-1" aria-labelledby="addFareRateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-navy text-white">
+        <h5 class="modal-title fw-bold" id="addFareRateModalLabel">
+          <i class="fa-solid fa-plus me-2 text-warning"></i>Add Destination Fare Rate
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/admin/fare-chart/add" method="POST">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-navy">Destination Name *</label>
+            <input type="text" name="destination" class="form-control" placeholder="e.g. Bartsham / Trashigang Dzong" required>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label fw-bold small text-navy">Bus Fare (Nu./Pax) *</label>
+              <input type="number" step="10" name="busFare" class="form-control" placeholder="e.g. 250" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label fw-bold small text-navy">Taxi Fare (Nu./Hire) *</label>
+              <input type="number" step="10" name="taxiFare" class="form-control" placeholder="e.g. 1200" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-bold small text-navy">Route Notes (Optional)</label>
+            <input type="text" name="notes" class="form-control" placeholder="e.g. Scenic regional monastery route">
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary btn-sm rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 fw-bold">Save New Rate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

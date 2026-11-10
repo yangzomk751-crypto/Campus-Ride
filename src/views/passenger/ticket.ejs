@@ -1,0 +1,112 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow">
+  
+  <div class="mb-6 flex items-center justify-between">
+    <a href="/my-bookings" class="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-brand-600 transition">
+      <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to My Bookings
+    </a>
+
+    <button onclick="window.print()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center space-x-1.5">
+      <i class="fa-solid fa-print"></i>
+      <span>Print / Save PDF</span>
+    </button>
+  </div>
+
+  <!-- Printable Boarding Pass Card -->
+  <div id="printable-ticket" class="bg-white rounded-3xl border border-slate-200 shadow-lg overflow-hidden">
+    
+    <!-- Top Brand Header Banner -->
+    <div class="bg-gradient-to-r from-brand-700 via-brand-600 to-indigo-700 px-6 py-5 text-white flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-lg">
+          <i class="fa-solid fa-bus"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-extrabold uppercase tracking-wider">Campus Boarding Pass</h2>
+          <p class="text-xs text-brand-100 font-mono">Metro University Transit Authority</p>
+        </div>
+      </div>
+      <div class="text-right">
+        <span class="text-[10px] uppercase font-bold text-brand-200 block">Ticket Reference</span>
+        <span class="font-mono text-sm font-extrabold bg-white/20 px-2.5 py-1 rounded-md tracking-wider">
+          <%= booking.booking_code %>
+        </span>
+      </div>
+    </div>
+
+    <!-- Main Ticket Body -->
+    <div class="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      <!-- Left 2 cols: Journey Details -->
+      <div class="md:col-span-2 space-y-6">
+        <div>
+          <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Route</span>
+          <h3 class="text-xl font-black text-slate-900"><%= booking.route_name %></h3>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <div>
+            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Boarding Location</span>
+            <p class="text-xs font-bold text-slate-900"><%= booking.origin_stop_name %></p>
+            <span class="text-[10px] font-semibold text-brand-600 font-mono">Code: <%= booking.origin_stop_code %></span>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Destination Stop</span>
+            <p class="text-xs font-bold text-slate-900"><%= booking.destination_stop_name %></p>
+            <span class="text-[10px] font-semibold text-rose-600 font-mono">Code: <%= booking.destination_stop_code %></span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 text-xs">
+          <div>
+            <span class="text-[10px] font-semibold uppercase text-slate-400 block">Passenger</span>
+            <p class="font-bold text-slate-900"><%= booking.passenger_name %></p>
+            <p class="text-[10px] text-slate-500 font-mono"><%= booking.student_staff_id || 'Campus Member' %></p>
+          </div>
+          <div>
+            <span class="text-[10px] font-semibold uppercase text-slate-400 block">Departure</span>
+            <p class="font-bold text-brand-700">
+              <%= new Date(booking.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+            </p>
+            <p class="text-[10px] text-slate-500">
+              <%= new Date(booking.departure_time).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' }) %>
+            </p>
+          </div>
+          <div>
+            <span class="text-[10px] font-semibold uppercase text-slate-400 block">Seats Booked</span>
+            <p class="font-extrabold text-slate-900 text-sm"><%= booking.seats_booked %> Seat(s)</p>
+            <p class="text-[10px] text-emerald-600 font-semibold">Status: <%= booking.status %></p>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-100 pt-4 flex items-center justify-between text-xs text-slate-500">
+          <span><i class="fa-solid fa-van-shuttle mr-1"></i> <%= booking.vehicle_plate %> (<%= booking.vehicle_model %>)</span>
+          <span><i class="fa-solid fa-id-card mr-1"></i> Driver: <%= booking.driver_name || 'Assigned Driver' %></span>
+        </div>
+      </div>
+
+      <!-- Right col: QR Code & Verification Stub -->
+      <div class="flex flex-col items-center justify-center p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center">
+        <div class="p-2 bg-white rounded-xl shadow-xs border border-slate-200 mb-3">
+          <img src="<%= qrCodeUrl %>" alt="QR Code Boarding Pass" class="w-36 h-36 mx-auto">
+        </div>
+        <p class="text-[11px] font-mono text-slate-600 font-bold tracking-widest"><%= booking.booking_code %></p>
+        <p class="text-[10px] text-slate-400 mt-1">Scan upon boarding shuttle</p>
+      </div>
+
+    </div>
+
+    <!-- Bottom Ticket Stub Banner -->
+    <div class="bg-slate-100/80 px-6 py-3 border-t border-dashed border-slate-200 text-center">
+      <p class="text-[10px] text-slate-400 font-mono uppercase tracking-wider">
+        • Present this ticket to driver prior to boarding • Valid only for the scheduled departure •
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

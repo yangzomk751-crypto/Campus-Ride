@@ -1,0 +1,280 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <h2 class="fw-extrabold text-white mb-0">Book a Campus Taxi</h2>
+        <small class="text-light text-opacity-75">
+          Sherubtse Taxi Service • Book Now or Schedule for Later • All 20 Dzongkhags & Custom Routes
+        </small>
+      </div>
+
+      <div>
+        <a href="/fare-chart" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-tags me-1"></i> View Fare Chart
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <div class="row g-4">
+    <!-- Taxi Booking Form -->
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <h4 class="fw-bold text-navy mb-4"><i class="fa-solid fa-taxi text-primary me-2"></i> Taxi Reservation</h4>
+
+        <form action="/book-taxi" method="POST" id="taxiBookingForm">
+          <!-- Booking Mode: Book Now vs Schedule Later -->
+          <div class="mb-4">
+            <label class="form-label fw-bold small text-navy d-block">Booking Preference *</label>
+            <div class="row g-2">
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="bookingMode" id="modeBookNow" value="Book Now" checked onchange="toggleScheduleFields()">
+                <label class="btn btn-outline-primary w-100 py-3 rounded-3 text-start" for="modeBookNow">
+                  <i class="fa-solid fa-bolt text-warning fs-4 d-block mb-1"></i>
+                  <strong class="d-block small">Book Now</strong>
+                  <span class="text-muted" style="font-size: 0.72rem;">Immediate pickup, first driver to accept</span>
+                </label>
+              </div>
+              <div class="col-6">
+                <input type="radio" class="btn-check" name="bookingMode" id="modeSchedule" value="Schedule Later" onchange="toggleScheduleFields()">
+                <label class="btn btn-outline-primary w-100 py-3 rounded-3 text-start" for="modeSchedule">
+                  <i class="fa-solid fa-calendar-clock text-primary fs-4 d-block mb-1"></i>
+                  <strong class="d-block small">Schedule for Later</strong>
+                  <span class="text-muted" style="font-size: 0.72rem;">Plan departure date and time in advance</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pickup Location -->
+          <div class="mb-3">
+            <label for="pickupLocation" class="form-label fw-bold small text-navy">Pickup Location *</label>
+            <select class="form-select rounded-3" id="pickupLocation" name="pickupLocation" required>
+              <option value="" disabled selected>-- Select pickup point --</option>
+              <% locations.forEach(function(loc) { %>
+                <option value="<%= loc %>"><%= loc %></option>
+              <% }); %>
+            </select>
+          </div>
+
+          <!-- Destination Selection (20 Dzongkhags + Unlisted) -->
+          <div class="mb-3">
+            <label for="destinationSelect" class="form-label fw-bold small text-navy">Destination *</label>
+            <select class="form-select rounded-3" id="destinationSelect" name="destinationSelect" required onchange="handleDestinationChange()">
+              <option value="" disabled selected>-- Select destination or custom route --</option>
+              <optgroup label="Official Campus & Local Routes">
+                <% rates.filter(r => r.destination.includes('Hostel') || r.destination.includes('Rangjung')).forEach(function(r) { %>
+                  <option value="<%= r.destination %>" data-taxi-fare="<%= r.taxi_fare %>">
+                    <%= r.destination %> (Whole Taxi: Nu. <%= parseFloat(r.taxi_fare).toLocaleString() %>)
+                  </option>
+                <% }); %>
+              </optgroup>
+              <optgroup label="Dzongkhags of Bhutan (from Kanglung)">
+                <% rates.filter(r => !r.destination.includes('Hostel') && !r.destination.includes('Rangjung')).forEach(function(r) { %>
+                  <option value="<%= r.destination %>" data-taxi-fare="<%= r.taxi_fare %>">
+                    <%= r.destination %> (Whole Taxi: Nu. <%= parseFloat(r.taxi_fare).toLocaleString() %>)
+                  </option>
+                <% }); %>
+              </optgroup>
+              <optgroup label="Other Destination">
+                <option value="OTHER">-- Unlisted Destination (Request Custom Fare Quote) --</option>
+              </optgroup>
+            </select>
+          </div>
+
+          <!-- Custom Destination Input (Shown if OTHER is selected) -->
+          <div class="mb-3 p-3 bg-light rounded-3 border" id="customDestinationDiv" style="display: none;">
+            <label for="customDestination" class="form-label fw-bold small text-navy">
+              <i class="fa-solid fa-map-pin text-primary me-1"></i> Specify Custom Destination *
+            </label>
+            <input type="text" class="form-control mb-2" id="customDestination" name="customDestination" placeholder="e.g. Radhi Village, Phongmey, Wamrong...">
+            <small class="text-muted d-block">
+              <i class="fa-solid fa-info-circle text-primary me-1"></i> For destinations not listed in the standard fare chart, the Transport Admin will review your destination and provide an official quotation before booking confirmation.
+            </small>
+          </div>
+
+          <!-- Schedule Fields (Shown if Schedule Later) -->
+          <div id="scheduleFields" class="row g-3 mb-3 p-3 bg-light rounded-3 border" style="display: none;">
+            <div class="col-md-6">
+              <label for="travelDate" class="form-label fw-bold small text-navy">Preferred Travel Date *</label>
+              <input type="date" class="form-control" id="travelDate" name="travelDate" min="<%= new Date().toISOString().split('T')[0] %>">
+            </div>
+            <div class="col-md-6">
+              <label for="departureTime" class="form-label fw-bold small text-navy">Preferred Departure Time *</label>
+              <input type="time" class="form-control" id="departureTime" name="departureTime">
+            </div>
+            <div class="col-12">
+              <small class="text-muted">
+                <i class="fa-solid fa-calendar-check text-success me-1"></i> System automatically checks verified driver availability to prevent overlapping schedule conflicts.
+              </small>
+            </div>
+          </div>
+
+          <!-- Passenger Count & Ride Sharing -->
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="passengerCount" class="form-label fw-bold small text-navy">Number of Passengers (1 - 4) *</label>
+              <select class="form-select" id="passengerCount" name="passengerCount" onchange="updateFareEstimate()">
+                <option value="1" selected>1 Passenger</option>
+                <option value="2">2 Passengers</option>
+                <option value="3">3 Passengers</option>
+                <option value="4">4 Passengers (Full Car)</option>
+              </select>
+              <small class="text-muted">Standard taxi capacity: max 4 pax</small>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-bold small text-navy d-block">Taxi Hire Option *</label>
+              <div class="form-check form-switch pt-2">
+                <input class="form-check-input" type="checkbox" id="rideSharingOpted" name="rideSharingOpted" value="true" onchange="updateFareEstimate()">
+                <label class="form-check-label fw-semibold" for="rideSharingOpted">
+                  <i class="fa-solid fa-users text-primary me-1"></i> Share Taxi (Split Fare)
+                </label>
+              </div>
+              <small class="text-muted d-block mt-1">Divides the vehicle fare among passengers.</small>
+            </div>
+          </div>
+
+          <!-- Remarks -->
+          <div class="mb-4">
+            <label for="remarks" class="form-label fw-bold small text-navy">Additional Remarks (Optional)</label>
+            <input type="text" class="form-control" id="remarks" name="remarks" placeholder="e.g. Carrying heavy luggage, need pickup near Upper Gate ATM">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-sm">
+            <i class="fa-solid fa-check me-2"></i> Confirm Taxi Request
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Live Fare Calculation & Summary Sidebar -->
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 80px;">
+        <h5 class="fw-bold text-navy mb-3"><i class="fa-solid fa-receipt text-primary me-2"></i> Fare Estimation</h5>
+
+        <div class="p-3 bg-light rounded-3 border mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small">Destination:</span>
+            <strong class="text-navy" id="previewDestination">None Selected</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small">Hire Mode:</span>
+            <strong class="text-navy" id="previewHireMode">Whole Taxi Hire</strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="text-muted small">Passenger Count:</span>
+            <strong class="text-navy" id="previewPax">1 Pax</strong>
+          </div>
+          <hr class="my-2">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="text-muted small">Total Vehicle Fare:</span>
+            <span class="fs-5 fw-bold text-navy" id="previewTotalFare">Nu. 0.00</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center" id="splitFareRow" style="display: none !important;">
+            <span class="text-success small fw-bold">Fare Per Passenger:</span>
+            <span class="fs-5 fw-bold text-success" id="previewPerPaxFare">Nu. 0.00</span>
+          </div>
+        </div>
+
+        <div class="alert alert-info py-2 small mb-3 border-0">
+          <i class="fa-solid fa-cash-register me-1"></i> <strong>Cash Payment:</strong> Fares are calculated on the server and saved with the booking. You pay cash to the driver upon reaching destination.
+        </div>
+
+        <div class="small text-muted">
+          <strong class="d-block text-navy mb-1"><i class="fa-solid fa-shield-check text-success me-1"></i> Booking Guarantee:</strong>
+          • First verified driver to accept gets the ride.<br>
+          • Conflict prevention ensures drivers are not double-booked.<br>
+          • You can cancel prior to journey commencement.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleScheduleFields() {
+    const isSchedule = document.getElementById('modeSchedule').checked;
+    const scheduleDiv = document.getElementById('scheduleFields');
+    const dateInput = document.getElementById('travelDate');
+    const timeInput = document.getElementById('departureTime');
+
+    if (isSchedule) {
+      scheduleDiv.style.display = 'flex';
+      dateInput.required = true;
+      timeInput.required = true;
+    } else {
+      scheduleDiv.style.display = 'none';
+      dateInput.required = false;
+      timeInput.required = false;
+    }
+  }
+
+  function handleDestinationChange() {
+    const select = document.getElementById('destinationSelect');
+    const customDiv = document.getElementById('customDestinationDiv');
+    const customInput = document.getElementById('customDestination');
+
+    if (select.value === 'OTHER') {
+      customDiv.style.display = 'block';
+      customInput.required = true;
+    } else {
+      customDiv.style.display = 'none';
+      customInput.required = false;
+    }
+
+    updateFareEstimate();
+  }
+
+  function updateFareEstimate() {
+    const select = document.getElementById('destinationSelect');
+    const isSharing = document.getElementById('rideSharingOpted').checked;
+    const paxCount = parseInt(document.getElementById('passengerCount').value, 10) || 1;
+
+    const destPreview = document.getElementById('previewDestination');
+    const hireModePreview = document.getElementById('previewHireMode');
+    const paxPreview = document.getElementById('previewPax');
+    const totalFarePreview = document.getElementById('previewTotalFare');
+    const splitRow = document.getElementById('splitFareRow');
+    const perPaxPreview = document.getElementById('previewPerPaxFare');
+
+    paxPreview.textContent = paxCount + ' Pax';
+    hireModePreview.textContent = isSharing ? 'Shared Taxi' : 'Whole Taxi Hire';
+
+    if (select.value === 'OTHER') {
+      destPreview.textContent = 'Custom Destination';
+      totalFarePreview.textContent = 'Custom Quote Needed';
+      splitRow.style.setProperty('display', 'none', 'important');
+      return;
+    }
+
+    const selectedOption = select.options[select.selectedIndex];
+    if (!selectedOption || !selectedOption.dataset.taxiFare) {
+      destPreview.textContent = 'None Selected';
+      totalFarePreview.textContent = 'Nu. 0.00';
+      splitRow.style.setProperty('display', 'none', 'important');
+      return;
+    }
+
+    const baseFare = parseFloat(selectedOption.dataset.taxiFare);
+    destPreview.textContent = select.value;
+    totalFarePreview.textContent = 'Nu. ' + baseFare.toLocaleString();
+
+    if (isSharing && paxCount > 1) {
+      const perPax = Math.round((baseFare / paxCount) * 100) / 100;
+      perPaxPreview.textContent = 'Nu. ' + perPax.toLocaleString() + ' / pax';
+      splitRow.style.removeProperty('display');
+    } else {
+      splitRow.style.setProperty('display', 'none', 'important');
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

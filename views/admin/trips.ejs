@@ -1,0 +1,143 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/alerts') %>
+
+<main class="container py-4">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h2 class="fw-extrabold text-dark mb-0">Campus Trip Moderation</h2>
+        <span class="badge bg-danger text-uppercase">Admin</span>
+      </div>
+      <p class="text-muted small mb-0">Monitor all published routes, carpools, campus bus schedules, and moderate listings</p>
+    </div>
+    <a href="/admin" class="btn btn-outline-secondary btn-sm">
+      <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="card card-campus border-0 shadow-sm p-3 mb-4 bg-white">
+    <form action="/admin/trips" method="GET" class="row g-2 align-items-end">
+      <div class="col-md-6">
+        <label class="form-label small fw-bold text-dark mb-1">Search Trips (Route or Driver)</label>
+        <input type="text" name="search" class="form-control form-control-sm" placeholder="e.g. Kanglung, Trashigang, or Ugyen..." value="<%= filters.search %>">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label small fw-bold text-dark mb-1">Trip Status</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+          <option value="Scheduled" <%= filters.status === 'Scheduled' ? 'selected' : '' %>>Scheduled (Active)</option>
+          <option value="Completed" <%= filters.status === 'Completed' ? 'selected' : '' %>>Completed</option>
+          <option value="Cancelled" <%= filters.status === 'Cancelled' ? 'selected' : '' %>>Cancelled / Removed</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary-blue btn-sm w-100 fw-bold">
+          <i class="fa-solid fa-filter me-1"></i> Filter
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card card-campus border-0 shadow-sm p-4 bg-white">
+    <% if (trips && trips.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 small">
+          <thead class="table-light">
+            <tr>
+              <th>Trip ID</th>
+              <th>Route</th>
+              <th>Vehicle Type</th>
+              <th>Travel Date & Time</th>
+              <th>Seats Available</th>
+              <th>Driver</th>
+              <th>Status</th>
+              <th class="text-end">Moderation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% trips.forEach(t => { %>
+              <tr>
+                <td><code>#<%= t.trip_id %></code></td>
+                <td>
+                  <strong class="text-dark"><%= t.starting_location %> ➔ <%= t.destination %></strong>
+                  <div class="text-muted" style="font-size: 0.75rem;">Pickup: <%= t.pickup_location %></div>
+                </td>
+                <td>
+                  <span class="<%= t.vehicle_type === 'Campus Bus' ? 'badge-vehicle-bus' : 'badge-vehicle-car' %>" style="font-size: 0.7rem;">
+                    <%= t.vehicle_type %>
+                  </span>
+                </td>
+                <td>
+                  <%= t.travel_date.toISOString().split('T')[0] %>
+                  <div class="text-muted" style="font-size: 0.75rem;"><%= t.departure_time.slice(0, 5) %></div>
+                </td>
+                <td>
+                  <strong><%= t.available_seats %></strong> / <%= t.total_seats %>
+                </td>
+                <td>
+                  <%= t.driver_name %>
+                  <div class="text-muted" style="font-size: 0.75rem;"><%= t.driver_phone %></div>
+                </td>
+                <td>
+                  <span class="badge <%= t.trip_status === 'Scheduled' ? 'badge-status-scheduled' : (t.trip_status === 'Completed' ? 'badge-status-resolved' : 'badge-status-cancelled') %>">
+                    <%= t.trip_status %>
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-1">
+                    <a href="/trips/<%= t.trip_id %>" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size: 0.75rem;">
+                      Details
+                    </a>
+                    <% if (t.trip_status === 'Scheduled') { %>
+                      <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;" data-bs-toggle="modal" data-bs-target="#cancelTripModal-<%= t.trip_id %>">
+                        Remove
+                      </button>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Remove Modal -->
+              <% if (t.trip_status === 'Scheduled') { %>
+                <div class="modal fade" id="cancelTripModal-<%= t.trip_id %>" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow">
+                      <form action="/admin/trips/<%= t.trip_id %>/cancel" method="POST">
+                        <div class="modal-header bg-light">
+                          <h5 class="modal-title fw-bold text-danger">Remove Trip #<%= t.trip_id %></h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                          <p class="small text-secondary">
+                            Are you sure you want to remove this trip from <strong><%= t.starting_location %> to <%= t.destination %></strong>? Any booked passengers will have their seats released and receive cancellation notices.
+                          </p>
+                          <div class="mb-3">
+                            <label class="form-label small fw-bold">Admin Removal Reason *</label>
+                            <input type="text" name="adminReason" class="form-control" required placeholder="e.g. Inappropriate fare, policy violation, reported driver">
+                          </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Keep Trip</button>
+                          <button type="submit" class="btn btn-danger btn-sm fw-bold">Confirm Removal</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              <% } %>
+
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="empty-state py-4">
+        <p class="text-muted small mb-0">No trips found matching current filters.</p>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,184 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+<%- include('partials/alerts') %>
+
+<main class="flex-grow">
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-b from-brand-900 via-brand-800 to-slate-900 text-white overflow-hidden py-16 sm:py-24">
+    <!-- Background subtle grid pattern -->
+    <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-10">
+        <span class="inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-semibold bg-brand-500/20 text-brand-200 border border-brand-400/30 mb-4 backdrop-blur-sm">
+          <i class="fa-solid fa-bolt text-amber-400"></i>
+          <span>Smart University Transit Network</span>
+        </span>
+        <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight text-white mb-4">
+          Campus Commutes Made Simple, Fast & Reliable
+        </h1>
+        <p class="text-lg text-slate-300">
+          Book scheduled shuttles, check real-time seat availability, and travel effortlessly between dorms, libraries, lecture halls, and transit hubs.
+        </p>
+      </div>
+
+      <!-- Quick Search Widget Card -->
+      <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-4 sm:p-6 text-slate-800 border border-slate-100">
+        <form action="/trips" method="GET" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-1.5">
+              <i class="fa-solid fa-circle-dot text-brand-600 mr-1"></i> Pickup Stop
+            </label>
+            <select name="origin" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+              <option value="">All Departure Stops</option>
+              <% stops.forEach(stop => { %>
+                <option value="<%= stop.id %>"><%= stop.name %> (<%= stop.code %>)</option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 tracking-wider mb-1.5">
+              <i class="fa-solid fa-location-dot text-rose-600 mr-1"></i> Destination Stop
+            </label>
+            <select name="destination" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
+              <option value="">All Destination Stops</option>
+              <% stops.forEach(stop => { %>
+                <option value="<%= stop.id %>"><%= stop.name %> (<%= stop.code %>)</option>
+              <% }) %>
+            </select>
+          </div>
+
+          <div class="flex flex-col justify-end">
+            <button type="submit" class="w-full py-2.5 px-6 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>Find Rides Now</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Live Upcoming Departures Preview -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+      <div>
+        <h2 class="text-2xl font-bold text-slate-900 tracking-tight">Upcoming Campus Departures</h2>
+        <p class="text-sm text-slate-500">Live shuttles operating across campus today</p>
+      </div>
+      <a href="/trips" class="inline-flex items-center text-sm font-semibold text-brand-600 hover:text-brand-800 transition">
+        <span>View Full Schedule</span>
+        <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+      </a>
+    </div>
+
+    <% if (upcomingTrips && upcomingTrips.length > 0) { %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <% upcomingTrips.forEach(trip => { %>
+          <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md hover:border-brand-200 transition-all flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-brand-700">
+                  <i class="fa-solid <%= trip.vehicle_type === 'Electric Cart' ? 'fa-bolt' : 'fa-van-shuttle' %> text-xs"></i>
+                  <span><%= trip.vehicle_type %></span>
+                </span>
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full <%= trip.status === 'BOARDING' ? 'bg-amber-100 text-amber-700 animate-pulse' : 'bg-emerald-100 text-emerald-700' %>">
+                  ● <%= trip.status %>
+                </span>
+              </div>
+
+              <h3 class="text-lg font-bold text-slate-900 mb-2"><%= trip.route_name %></h3>
+
+              <div class="space-y-1.5 text-xs text-slate-600 mb-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center"><i class="fa-solid fa-circle text-[8px] text-brand-500 mr-2"></i> From:</span>
+                  <span class="font-medium text-slate-800"><%= trip.origin_stop_name %></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="flex items-center"><i class="fa-solid fa-location-dot text-[10px] text-rose-500 mr-2"></i> To:</span>
+                  <span class="font-medium text-slate-800"><%= trip.destination_stop_name %></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+              <div>
+                <span class="block text-xs text-slate-400">Departure</span>
+                <span class="text-sm font-bold text-slate-800">
+                  <%= new Date(trip.departure_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                </span>
+              </div>
+              <div>
+                <span class="block text-xs text-slate-400">Available</span>
+                <span class="text-sm font-bold <%= trip.available_seats <= 3 ? 'text-amber-600' : 'text-emerald-600' %>">
+                  <%= trip.available_seats %> seats
+                </span>
+              </div>
+              <div>
+                <span class="block text-xs text-slate-400">Fare</span>
+                <span class="text-sm font-bold text-slate-900">
+                  <%= parseFloat(trip.fare_amount) === 0 ? 'FREE' : '$' + parseFloat(trip.fare_amount).toFixed(2) %>
+                </span>
+              </div>
+              <a href="/trips/<%= trip.id %>" class="px-4 py-2 bg-slate-900 hover:bg-brand-600 text-white text-xs font-semibold rounded-xl transition">
+                Reserve Seat
+              </a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <div class="text-center py-12 bg-white rounded-2xl border border-slate-200">
+        <i class="fa-solid fa-bus text-4xl text-slate-300 mb-3"></i>
+        <p class="text-slate-500 font-medium">No upcoming departures at this moment.</p>
+        <a href="/trips" class="mt-2 inline-block text-brand-600 text-sm font-semibold hover:underline">Explore full trip list &rarr;</a>
+      </div>
+    <% } %>
+  </section>
+
+  <!-- Key Features Grid -->
+  <section class="bg-slate-100/70 border-y border-slate-200/80 py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">Built for Seamless Campus Life</h2>
+        <p class="text-sm text-slate-500 mt-2">Everything students, drivers, and campus admins need in one unified platform.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 text-brand-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-ticket"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Digital Boarding Pass</h3>
+          <p class="text-sm text-slate-600">
+            Instant booking confirmation with dynamic QR code boarding pass. Show it on your phone or print it directly.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Safe & Overbooking-Proof</h3>
+          <p class="text-sm text-slate-600">
+            Atomic PostgreSQL transactions prevent double bookings and race conditions when multiple students reserve at the same second.
+          </p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl mb-4">
+            <i class="fa-solid fa-users-viewfinder"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Driver & Admin Portals</h3>
+          <p class="text-sm text-slate-600">
+            Dedicated passenger manifests for drivers and fleet dispatch controls, route configuration, and stats for campus administrators.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('partials/footer') %>

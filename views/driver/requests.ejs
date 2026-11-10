@@ -1,0 +1,112 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="bg-navy py-4 text-white" style="background: linear-gradient(135deg, #172554 0%, #1e3a8a 100%);">
+  <div class="container">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div>
+        <span class="badge bg-warning text-dark fw-bold mb-1 text-uppercase">Dispatch Feed</span>
+        <h2 class="fw-extrabold text-white mb-0">Incoming Ride Requests</h2>
+        <small class="text-light text-opacity-75">
+          Eligible taxi bookings and requested weekday rides. First valid driver to accept receives the booking!
+        </small>
+      </div>
+
+      <div>
+        <a href="/driver" class="btn btn-outline-light btn-sm rounded-pill px-3">
+          <i class="fa-solid fa-gauge me-1"></i> Driver Console
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <%- include('../partials/alerts') %>
+
+  <% if (!isVerified) { %>
+    <div class="alert alert-warning border-0 shadow-sm rounded-4 p-4 mb-4">
+      <i class="fa-solid fa-shield-halved me-2"></i> Your driver account is pending Admin approval. You will be able to accept rides once verified.
+    </div>
+  <% } %>
+
+  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+    <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+      <h5 class="fw-bold text-navy mb-0">
+        <i class="fa-solid fa-bell text-warning me-2"></i> Available Requests (<%= requests.length %>)
+      </h5>
+      <span class="text-muted small">Updated in real-time</span>
+    </div>
+
+    <% if (requests && requests.length > 0) { %>
+      <div class="row g-3">
+        <% requests.forEach(function(r) { %>
+          <div class="col-md-6">
+            <div class="card border rounded-3 p-4 bg-light h-100 transition-hover border-top border-4 <%= r.service_type === 'Weekday Ride' ? 'border-warning' : 'border-primary' %>">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <div>
+                  <span class="badge <%= r.service_type === 'Weekday Ride' ? 'bg-warning text-dark' : 'bg-primary' %> fw-bold me-1">
+                    <%= r.service_type %>
+                  </span>
+                  <span class="badge bg-secondary"><%= r.booking_subtype %></span>
+                  <% if (r.ride_sharing_opted) { %>
+                    <span class="badge bg-info text-white">Shared Taxi</span>
+                  <% } %>
+                </div>
+                <span class="fs-5 fw-bold text-navy">Nu. <%= parseFloat(r.total_fare || 0).toLocaleString() %></span>
+              </div>
+
+              <h5 class="fw-bold text-navy mb-1"><%= r.destination %></h5>
+              <small class="text-muted d-block mb-3">
+                <i class="fa-solid fa-location-dot text-primary me-1"></i> Pickup: <strong><%= r.pickup_location %></strong>
+              </small>
+
+              <div class="p-2 bg-white rounded-3 border small mb-3">
+                <div class="d-flex justify-content-between py-1 border-bottom">
+                  <span class="text-muted">Travel Date & Time:</span>
+                  <strong><%= r.travel_date %> at <%= r.departure_time %></strong>
+                </div>
+                <div class="d-flex justify-content-between py-1 border-bottom">
+                  <span class="text-muted">Passenger:</span>
+                  <strong><%= r.passenger_name %> (<%= r.passenger_phone %>)</strong>
+                </div>
+                <div class="d-flex justify-content-between py-1">
+                  <span class="text-muted">Pax Count:</span>
+                  <strong><%= r.passenger_count %> Passenger(s)</strong>
+                </div>
+              </div>
+
+              <% if (r.remarks) { %>
+                <div class="small text-muted p-2 bg-white rounded border mb-3">
+                  <strong>Notes:</strong> "<%= r.remarks %>"
+                </div>
+              <% } %>
+
+              <div class="mt-auto d-flex gap-2 pt-2 border-top">
+                <form action="/driver/requests/<%= r.booking_id %>/accept" method="POST" class="flex-grow-1">
+                  <button type="submit" class="btn btn-success fw-bold w-100 rounded-pill shadow-sm" <%= !isVerified ? 'disabled' : '' %>>
+                    <i class="fa-solid fa-check me-1"></i> Accept Ride
+                  </button>
+                </form>
+                <form action="/driver/requests/<%= r.booking_id %>/reject" method="POST">
+                  <button type="submit" class="btn btn-outline-danger rounded-pill px-3">
+                    Reject
+                  </button>
+                </form>
+              </div>
+
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% } else { %>
+      <div class="text-center py-5 text-muted">
+        <i class="fa-solid fa-bell-slash fs-1 opacity-50 mb-3"></i>
+        <h6 class="fw-bold text-navy">No pending ride requests</h6>
+        <p class="small mb-0">Eligible requests for your vehicle type will appear here automatically.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
