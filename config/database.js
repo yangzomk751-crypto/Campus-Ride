@@ -3,10 +3,15 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
+const isRemoteUrl =
+  process.env.DATABASE_URL &&
+  !process.env.DATABASE_URL.includes('localhost') &&
+  !process.env.DATABASE_URL.includes('127.0.0.1');
+
 const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl: isRemoteUrl || process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     }
   : {
       host: process.env.DB_HOST || '127.0.0.1',
@@ -16,7 +21,7 @@ const poolConfig = process.env.DATABASE_URL
       database: process.env.DB_NAME || 'campus_ride_db',
       max: 20,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 3000,
+      connectionTimeoutMillis: 5000,
     };
 
 const pool = new Pool(poolConfig);
