@@ -5,15 +5,15 @@ const { ensureAuthenticated } = require('../middleware/authMiddleware');
 
 router.get('/dashboard', ensureAuthenticated, bookingController.getDashboard);
 
-// 4.1 Available Weekday Rides
+// Available Weekday Rides
 router.get('/weekday-rides', ensureAuthenticated, bookingController.getWeekdayRides);
 router.post('/weekday-rides', ensureAuthenticated, bookingController.postWeekdayRide);
 
-// 4.2 Book a Taxi
+// Book a Taxi
 router.get('/book-taxi', ensureAuthenticated, bookingController.getTaxiBookingForm);
 router.post('/book-taxi', ensureAuthenticated, bookingController.postTaxiBooking);
 
-// 4.3 Request a Bus
+// Request a Bus
 router.get('/book-bus', ensureAuthenticated, bookingController.getBusBookingForm);
 router.post('/book-bus', ensureAuthenticated, bookingController.postBusBooking);
 

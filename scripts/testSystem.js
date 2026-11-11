@@ -81,9 +81,9 @@ async function runTestSuite() {
     assert(thimphu && parseFloat(thimphu.bus_fare) === 1250 && parseFloat(thimphu.taxi_fare) === 16000, 'Thimphu fare: Bus Nu. 1250, Taxi Nu. 16000');
 
     // -----------------------------------------------------------
-    // TEST 4: Service 4.1 – Available Weekday Rides (Hostel ⇄ Classroom)
+    // TEST 4: Weekday Rides (Hostel ⇄ Academic Block)
     // -----------------------------------------------------------
-    console.log('\n[TEST 4] Testing Service 4.1: Available Weekday Rides...');
+    console.log('\n[TEST 4] Testing Weekday Rides...');
     const weekdayDrivers = await driverModel.getAvailableWeekdayDrivers();
     assert(weekdayDrivers.length > 0, `Found ${weekdayDrivers.length} verified drivers available for weekday rides`);
 
@@ -111,9 +111,9 @@ async function runTestSuite() {
     assert(weekdayBooking && weekdayBooking.booking_id, `Weekday booking created (#${weekdayBooking.booking_id}) with Pending status`);
 
     // -----------------------------------------------------------
-    // TEST 5: Service 4.2 – Book a Taxi (Whole Taxi Hire vs Shared Fare Splitting)
+    // TEST 5: Taxi Booking (Whole Taxi Hire vs Shared Fare Splitting)
     // -----------------------------------------------------------
-    console.log('\n[TEST 5] Testing Service 4.2: Taxi Booking & Fare Splitting...');
+    console.log('\n[TEST 5] Testing Taxi Booking & Fare Splitting...');
     // Whole taxi hire for 1 pax
     const wholeTaxiFare = await fareRateModel.calculateFare('Taxi', 'Trashigang', 1, false);
     assert(wholeTaxiFare.totalFare === 500.00 && wholeTaxiFare.farePerPassenger === 500.00, 'Whole taxi hire to Trashigang is Nu. 500');
@@ -131,9 +131,9 @@ async function runTestSuite() {
     assert(customFare.isQuotationRequired === true, 'Unlisted destination correctly triggers Admin Quotation requirement');
 
     // -----------------------------------------------------------
-    // TEST 6: Service 4.3 – Request a Campus Bus & Admin Workflow
+    // TEST 6: Campus Bus Booking & Admin Workflow
     // -----------------------------------------------------------
-    console.log('\n[TEST 6] Testing Service 4.3: Request a Bus & Admin Quotation...');
+    console.log('\n[TEST 6] Testing Campus Bus & Admin Quotation...');
     const busReq = await bookingModel.create({
       userId: staff.user_id,
       serviceType: 'Bus',

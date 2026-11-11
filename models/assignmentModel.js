@@ -3,7 +3,7 @@ const BookingModel = require('./bookingModel');
 
 const AssignmentModel = {
   /**
-   * Conflict Detection (Assignment Requirement FR14 & Chapter 7.5)
+   * Conflict Detection
    * Prevents assigning a vehicle or driver with overlapping trips on the same date/time
    */
   async checkOverlap({ vehicleId, driverId, travelDate, departureTime, excludeBookingId = null }) {

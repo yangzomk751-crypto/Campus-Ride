@@ -78,7 +78,7 @@ const driverController = {
     }
   },
 
-  // 3. TOGGLE WEEKDAY RIDES AVAILABILITY (Hostel ⇄ Classroom)
+  // 3. TOGGLE WEEKDAY RIDES AVAILABILITY (Hostel ⇄ Academic Block)
   async postToggleWeekdayAvailability(req, res) {
     try {
       const userId = req.session.user.id;
