@@ -97,7 +97,7 @@ async function runTestSuite() {
       bookingSubtype: 'Weekday',
       pickupLocation: 'North Hostel Block A',
       destination: 'Hostel to Classroom',
-      travelDate: new Date().toISOString().split('T')[0],
+      travelDate: new Date(Date.now() + 86400000 * (50 + Math.floor(Math.random() * 1000))).toISOString().split('T')[0],
       departureTime: '08:45:00',
       passengerCount: 1,
       rideSharingOpted: false,

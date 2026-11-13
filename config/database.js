@@ -1,7 +1,12 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
+
+// Parse PostgreSQL DATE (oid 1082) as a plain string 'YYYY-MM-DD' instead of UTC midnight Date object
+if (types && types.setTypeParser) {
+  types.setTypeParser(1082, (val) => val);
+}
 
 const isRemoteUrl =
   process.env.DATABASE_URL &&

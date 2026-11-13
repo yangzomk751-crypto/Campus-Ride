@@ -68,7 +68,7 @@
                 </td>
                 <td><%= r.pickup_location %></td>
                 <td>
-                  <small class="text-muted"><%= r.travel_date %> • <%= r.passenger_count %> Pax</small>
+                  <small class="text-muted"><%= formatDate(r.travel_date) %> • <%= r.passenger_count %> Pax</small>
                 </td>
                 <td>
                   <% if (r.quotation_status === 'Pending Admin Quotation') { %>
@@ -109,7 +109,7 @@
                       <div class="modal-body p-4 text-start">
                         <div class="p-3 bg-light rounded-3 border mb-3 small">
                           <strong class="d-block text-navy">Route: <%= r.pickup_location %> → <%= r.destination %></strong>
-                          <span>Service: <%= r.service_type %> • Passengers: <%= r.passenger_count %> Pax • Date: <%= r.travel_date %></span>
+                          <span>Service: <%= r.service_type %> • Passengers: <%= r.passenger_count %> Pax • Date: <%= formatDate(r.travel_date) %></span>
                           <% if (r.trip_purpose) { %>
                             <div class="text-muted mt-1"><strong>Purpose:</strong> <%= r.trip_purpose %></div>
                           <% } %>

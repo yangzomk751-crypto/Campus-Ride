@@ -22,7 +22,7 @@
         </div>
         <h2 class="fw-extrabold text-white mb-0"><%= booking.destination %></h2>
         <small class="text-light text-opacity-75">
-          Pickup: <%= booking.pickup_location %> • Scheduled for <%= booking.travel_date %> at <%= booking.departure_time %>
+          Pickup: <%= booking.pickup_location %> • Scheduled for <%= formatDate(booking.travel_date) %> at <%= formatTime(booking.departure_time) %>
         </small>
       </div>
 
@@ -91,13 +91,13 @@
           <div class="col-sm-4">
             <div class="p-3 bg-light rounded-3 border">
               <small class="text-muted text-uppercase fw-semibold d-block">Travel Date</small>
-              <strong class="text-navy"><%= booking.travel_date %></strong>
+              <strong class="text-navy"><%= formatDate(booking.travel_date) %></strong>
             </div>
           </div>
           <div class="col-sm-4">
             <div class="p-3 bg-light rounded-3 border">
               <small class="text-muted text-uppercase fw-semibold d-block">Departure Time</small>
-              <strong class="text-navy"><%= booking.departure_time %></strong>
+              <strong class="text-navy"><%= formatTime(booking.departure_time) %></strong>
             </div>
           </div>
           <div class="col-sm-4">

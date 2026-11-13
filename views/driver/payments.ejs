@@ -53,7 +53,7 @@
                   <small class="text-muted d-block">Service: <%= p.service_type %></small>
                 </td>
                 <td>
-                  <small class="text-muted"><%= p.travel_date ? new Date(p.travel_date).toLocaleDateString() : 'N/A' %></small>
+                  <small class="text-muted"><%= p.travel_date ? formatDate(p.travel_date) : 'N/A' %></small>
                 </td>
                 <td>
                   <strong><%= p.passenger_name %></strong>

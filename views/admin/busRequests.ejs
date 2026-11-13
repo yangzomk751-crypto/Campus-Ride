@@ -58,7 +58,7 @@
                   <small class="text-muted d-block text-truncate" style="max-width: 180px;"><%= b.trip_purpose %></small>
                 </td>
                 <td>
-                  <small class="text-muted"><%= b.travel_date %> <%= b.departure_time %></small>
+                  <small class="text-muted"><%= formatDate(b.travel_date) %> • <%= formatTime(b.departure_time) %></small>
                 </td>
                 <td>
                   <span class="badge bg-info text-white fw-bold"><%= b.passenger_count %> Pax</span>
@@ -131,7 +131,7 @@
                       <div class="modal-body p-4 text-start">
                         <div class="p-3 bg-light rounded-3 border mb-3 small">
                           <strong class="d-block text-navy">Destination: <%= b.destination %></strong>
-                          <span>Date: <%= b.travel_date %> at <%= b.departure_time %> • <%= b.passenger_count %> Passengers</span>
+                          <span>Date: <%= formatDate(b.travel_date) %> at <%= formatTime(b.departure_time) %> • <%= b.passenger_count %> Passengers</span>
                         </div>
 
                         <div class="mb-3">

@@ -139,7 +139,7 @@
 
                 <h6 class="fw-bold text-navy mb-1"><%= r.destination %></h6>
                 <small class="text-muted d-block mb-2">
-                  <i class="fa-solid fa-location-dot text-primary me-1"></i> Pickup: <%= r.pickup_location %> • <%= r.travel_date %> at <%= r.departure_time %>
+                  <i class="fa-solid fa-location-dot text-primary me-1"></i> Pickup: <%= r.pickup_location %> • <%= formatDate(r.travel_date) %> at <%= formatTime(r.departure_time) %>
                 </small>
 
                 <div class="d-flex justify-content-between align-items-center pt-2 border-top">
@@ -187,7 +187,7 @@
                   <span class="badge <%= t.booking_status === 'In Progress' ? 'bg-info text-dark' : 'bg-primary' %>">
                     <%= t.booking_status %>
                   </span>
-                  <small class="text-muted"><%= t.travel_date %> <%= t.departure_time %></small>
+                  <small class="text-muted"><%= formatDate(t.travel_date) %> • <%= formatTime(t.departure_time) %></small>
                 </div>
                 <h6 class="fw-bold text-navy mb-1"><%= t.destination %></h6>
                 <small class="text-muted d-block mb-2">Passenger: <%= t.passenger_name %> (<%= t.passenger_phone %>)</small>

@@ -38,6 +38,54 @@ function ensureRole(...roles) {
   };
 }
 
+function formatDate(d) {
+  if (!d) return '';
+  if (d instanceof Date) {
+    const year = d.getUTCFullYear();
+    const month = d.getUTCMonth();
+    const day = d.getUTCDate();
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${days[d.getUTCDay()]}, ${day} ${months[month]} ${year}`;
+  }
+  const s = String(d).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    const [y, m, day] = s.split('T')[0].split('-');
+    const dateObj = new Date(Date.UTC(+y, +m - 1, +day));
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${days[dateObj.getUTCDay()]}, ${parseInt(day, 10)} ${months[+m - 1]} ${y}`;
+  }
+  if (s.includes('00:00:00') || s.includes('GMT') || s.includes('Coordinated')) {
+    const parsed = new Date(s);
+    if (!isNaN(parsed.getTime())) {
+      const year = parsed.getUTCFullYear();
+      const month = parsed.getUTCMonth();
+      const day = parsed.getUTCDate();
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${days[parsed.getUTCDay()]}, ${day} ${months[month]} ${year}`;
+    }
+  }
+  return s;
+}
+
+function formatTime(t) {
+  if (!t) return '';
+  const s = String(t).trim();
+  const parts = s.split(':');
+  if (parts.length >= 2) {
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1];
+    if (!isNaN(hours)) {
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const h12 = hours % 12 || 12;
+      return `${h12}:${minutes} ${ampm}`;
+    }
+  }
+  return s;
+}
+
 async function populateLocals(req, res, next) {
   res.locals.currentUser = req.session ? req.session.user : null;
   res.locals.success_msg = req.flash('success_msg');
@@ -45,6 +93,8 @@ async function populateLocals(req, res, next) {
   res.locals.info_msg = req.flash('info_msg');
   res.locals.currentPath = req.path;
   res.locals.collegeName = 'Sherubtse College';
+  res.locals.formatDate = formatDate;
+  res.locals.formatTime = formatTime;
 
   if (req.session && req.session.user) {
     try {
@@ -93,4 +143,6 @@ module.exports = {
   ensureDriver: ensureRole('driver', 'admin'),
   ensurePassenger: ensureRole('passenger', 'student', 'staff', 'admin'),
   populateLocals,
+  formatDate,
+  formatTime,
 };

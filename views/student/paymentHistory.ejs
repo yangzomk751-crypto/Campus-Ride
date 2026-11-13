@@ -57,7 +57,7 @@
                   <small class="text-muted d-block">From: <%= p.pickup_location %></small>
                 </td>
                 <td>
-                  <small class="text-muted"><%= p.travel_date ? new Date(p.travel_date).toLocaleDateString() : 'N/A' %></small>
+                  <small class="text-muted"><%= p.travel_date ? formatDate(p.travel_date) : 'N/A' %></small>
                 </td>
                 <td>
                   <span class="fs-6 fw-bold text-navy">Nu. <%= parseFloat(p.amount || 0).toLocaleString() %></span>

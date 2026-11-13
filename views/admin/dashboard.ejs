@@ -175,7 +175,7 @@
                   <small class="text-muted d-block">From: <%= b.pickup_location %></small>
                 </td>
                 <td>
-                  <small class="text-muted"><%= b.travel_date %> <%= b.departure_time %></small>
+                  <small class="text-muted"><%= formatDate(b.travel_date) %> • <%= formatTime(b.departure_time) %></small>
                 </td>
                 <td>
                   <span class="fw-bold text-navy">Nu. <%= parseFloat(b.total_fare || 0).toLocaleString() %></span>

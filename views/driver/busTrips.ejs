@@ -52,7 +52,7 @@
               <div class="p-3 bg-white rounded-3 border small mb-3">
                 <div class="d-flex justify-content-between py-1 border-bottom">
                   <span class="text-muted">Travel Date & Time:</span>
-                  <strong><%= t.travel_date %> at <%= t.departure_time %></strong>
+                  <strong><%= formatDate(t.travel_date) %> at <%= formatTime(t.departure_time) %></strong>
                 </div>
                 <div class="d-flex justify-content-between py-1 border-bottom">
                   <span class="text-muted">Group Leader:</span>

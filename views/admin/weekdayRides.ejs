@@ -77,7 +77,7 @@
                   <span class="badge bg-warning text-dark fw-bold"><%= b.destination %></span>
                 </td>
                 <td><%= b.pickup_location %></td>
-                <td><small class="text-muted"><%= b.travel_date %> <%= b.departure_time %></small></td>
+                <td><small class="text-muted"><%= formatDate(b.travel_date) %> • <%= formatTime(b.departure_time) %></small></td>
                 <td><%= b.driver_name || 'Driver Allocation Pending' %></td>
                 <td>
                   <% if (b.booking_status === 'Confirmed') { %>

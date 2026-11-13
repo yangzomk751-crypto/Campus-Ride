@@ -6,7 +6,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 require('dotenv').config();
 
-const { populateLocals } = require('./middleware/authMiddleware');
+const { populateLocals, formatDate, formatTime } = require('./middleware/authMiddleware');
 
 const publicRoutes = require('./routes/publicRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -16,6 +16,9 @@ const adminRoutes = require('./routes/adminRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
+
+app.locals.formatDate = formatDate;
+app.locals.formatTime = formatTime;
 
 // View engine setup
 app.set('view engine', 'ejs');
